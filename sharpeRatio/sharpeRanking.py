@@ -148,6 +148,7 @@ def get_sharpe_rank_data(nav_data, sharpe_data):
 def read_from_file(input_file):
   """
   Returns the file contents in a list.
+  The EOL character \n is stripped from each line.
   """
   msg = 'Reading from %s ...' % (input_file)
   print msg,
