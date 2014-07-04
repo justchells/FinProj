@@ -1,3 +1,4 @@
+import numpy
 import sys
 import sharpeRanking
 from datetime import datetime
@@ -34,8 +35,8 @@ def shrink_nav_data(nav_data, rank_data):
   by removing rows until the date of the first row in nav_data
   array matches that of rank_data array.
   """
-  print 'Shrinking nav_data ...'
-  print '\toriginal size - %d' % len(nav_data)
+  print 'Shrinking nav_data ...',
+  # print '\toriginal size - %d' % len(nav_data)
   target_date = rank_data[1].split(',')[0]
   i = 0
   cnt = len(nav_data)
@@ -44,7 +45,8 @@ def shrink_nav_data(nav_data, rank_data):
     if curr_date == target_date:
       break
   del nav_data[1:i]
-  print '\tmodified size - %d' % len(nav_data)
+  print 'done'
+  # print '\tmodified size - %d' % len(nav_data)
 
 def init_units_dict(fund_names):
   """
@@ -171,7 +173,6 @@ def stats(nav_data, rank_data):
   
   # annualized return
   last_date = nav_data[cnt - 1].split(',')[0]
-  print last_date
   dt = datetime.strptime(last_date, '%d-%m-%Y')
   cf = (dt, wealth)
   cashflows_overall.append(cf)
@@ -183,9 +184,28 @@ def stats(nav_data, rank_data):
   print 'Absolute return - %s%%' % round(abs_return, 2)
   print 'Annual return - %s%%' % round(annual_return, 2)
   print '\n'
+
+  rf_rate_halfyr = 4.5
+  rf_rate_annual = 9.0
   
+  print 'Half-Yearly Returns'
+  print '-------------------'
+  print ''
+  print 'Number of data points - %d' % len(returns_halfyr)
+  print 'Average - %s%%' % round(numpy.mean(returns_halfyr), 2)
+  print 'Standard Deviation - %s%%' % round(numpy.std(returns_halfyr), 2)
+  print 'Sharpe Ratio - %r' % round(sharpeRanking.get_sharpe_ratio(returns_halfyr, rf_rate_halfyr), 2)
+  print '\n'
+
+  print 'Annual Returns'
+  print '--------------'
+  print ''
+  print 'Number of data points - %d' % len(returns_annual)
+  print 'Average - %s%%' % round(numpy.mean(returns_annual), 2)
+  print 'Standard Deviation - %s%%' % round(numpy.std(returns_annual), 2)
+  print 'Sharpe Ratio - %r' % round(sharpeRanking.get_sharpe_ratio(returns_annual, rf_rate_annual), 2)
+  print '\n'
   
-    
 def main():
   """
   Defined for command line. 

@@ -33,16 +33,15 @@ def get_return_data(nav):
     returns.append(r)
   return returns
 
-def get_sharpe_ratio(return_data):
+def get_sharpe_ratio(return_data, rf_rate):
   """
   Returns the sharpe ratio for the given nav.
   
   Expected format for nav -> [nav]
   """
-  return_data = get_return_data(nav)
   mean = numpy.mean(return_data)
   stdev = numpy.std(return_data)
-  sharpe_ratio = round((mean - rfRate) / stdev, precision)
+  sharpe_ratio = round((mean - rf_rate) / stdev, precision)
   return sharpe_ratio
   
 def get_sharpe_data(nav_data):
@@ -82,7 +81,7 @@ def get_sharpe_data(nav_data):
       # compute the sharpe ratio for each fund
       for j in range(1, colNum):
         return_data = get_return_data(colDict[j])
-        sharpe_ratio = get_sharpe_ratio(return_data)
+        sharpe_ratio = get_sharpe_ratio(return_data, rfRate)
         line.append(str(sharpe_ratio))
         colDict[j].pop(0) # remove the first element to move the window
     
