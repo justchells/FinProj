@@ -177,8 +177,17 @@ def stats(nav_data, rank_data):
   cf = (dt, wealth)
   cashflows_overall.append(cf)
   annual_return = xirr(cashflows_overall) * 100.0
+
+  print '\n'
+  print 'Final Investment'
+  print '----------------'
+  for f in units_dict_overall:
+    if units_dict_overall[f] > 0:
+      print f, units_dict_overall[f]
   
   print '\n'
+  print 'Performance Measures'
+  print '--------------------'
   print 'Investment - %s' % "{:,}".format(total_inv)  
   print 'Wealth - %s' % "{:,}".format(int(round(wealth)))
   print 'Absolute return - %s%%' % round(abs_return, 2)
@@ -191,6 +200,9 @@ def stats(nav_data, rank_data):
   print 'Half-Yearly Returns'
   print '-------------------'
   print ''
+  for r in returns_halfyr:
+    print '%s%%' % round(r, 2)
+  print ''
   print 'Number of data points - %d' % len(returns_halfyr)
   print 'Average - %s%%' % round(numpy.mean(returns_halfyr), 2)
   print 'Standard Deviation - %s%%' % round(numpy.std(returns_halfyr), 2)
@@ -199,6 +211,9 @@ def stats(nav_data, rank_data):
 
   print 'Annual Returns'
   print '--------------'
+  print ''
+  for r in returns_annual:
+    print '%s%%' % round(r, 2)
   print ''
   print 'Number of data points - %d' % len(returns_annual)
   print 'Average - %s%%' % round(numpy.mean(returns_annual), 2)
