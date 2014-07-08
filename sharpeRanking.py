@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# Copyright 2014 Karthikeyan Chellappa
 
 # LOGIC
 # generate the sharpe ratio for each month based on returns of last 12 months
@@ -152,7 +151,7 @@ def read_from_file(input_file):
   Returns the file contents in a list.
   The EOL character \n is stripped from each line.
   """
-  msg = 'Reading from %s ...' % (input_file)
+  msg = 'reading from %s ...' % (input_file)
   print msg,
   file_data = []
   with open(input_file, 'r') as f:

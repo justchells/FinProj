@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# Copyright 2014 Karthikeyan Chellappa
 
 def xirr(transactions):
   """

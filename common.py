@@ -1,15 +1,36 @@
 #!/usr/bin/python
-# Copyright 2014 Karthikeyan Chellappa
 
-def init_dict(fund_names, value):
+import os
+
+def create_dir(dir_path):
+  """
+  Create the directory (and its parents) if it doesn't exist.
+  """
+  if not os.path.exists(dir_path):
+    print 'creating directory - %s' % dir_path
+    os.makedirs(dir_path)
+  pass
+
+def init_dict(fund_names):
   """
   Returns a dictionary using the given list of fund names.
   The key is the fund name, the value is set to 0 (units).
   """
   dict = {}
   for f in fund_names:
-    dict[f] = value
+    dict[f] = 0
   return dict
+
+def init_array_dict(fund_names):
+  """
+  Returns a dictionary using the given list of fund names.
+  The key is the fund name, the value is set to 0 (units).
+  """
+  dict = {}
+  for f in fund_names:
+    dict[f] = []
+  return dict
+
 
 def get_fund_nav_dict(fund_names, nav_line):
   """

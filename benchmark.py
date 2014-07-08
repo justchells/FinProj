@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# Copyright 2014 Karthikeyan Chellappa
 
 import common
 import numpy
@@ -22,7 +21,7 @@ def get_wealth(nav_dict, units_dict):
   
 def stats(nav_data, rank_data):
   """
-  Generates returns statistics using the given sharpe ratio ranking data.
+  Generates return statistics based on sharpe ratio ranking data.
   """
   
   # remove redundant entries in nav_data

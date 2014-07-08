@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# Copyright 2014 Karthikeyan Chellappa
 
 # INPUTS
 # navData.csv
@@ -28,14 +27,16 @@
 
 import os
 import sys
-from datetime import datetime
+import numpy
 import common
 import financial
 import sharpeRanking
+from datetime import datetime
 
-start_date = '01-01-2008'
 data_dir = 'data/rs'
 mnt_inv = 1000
+rf_rate_halfyr = 4.5
+rf_rate_annual = 9.0
 
 def get_wealth(nav_dict, units_dict):
   wealth = {}
@@ -45,107 +46,130 @@ def get_wealth(nav_dict, units_dict):
 
 def stats(nav_data):
   
-  # create data directory if it doesn't exist
-  if not os.path.exists(data_dir):
-    print 'creating output directory - %s' % data_dir
-    os.makedirs(data_dir)
+  # create data directory
+  common.create_dir(data_dir)
   
-  # remove the first 12 entries in nav_data to compare with benchmark
-  del nav_data[1:14]
+  # remove the first 12 entries in nav_data array 
+  # to compare result with benchmark
+  del nav_data[1:13]
 
-  # retrieve fund names
-  fund_names = nav_data[0].split(',')
-
-  # initialize units dictionary
-  units_dict_halfyr = common.init_dict(fund_names, 0)
-  units_dict_annual = common.init_dict(fund_names, 0)
-  units_dict_overall = common.init_dict(fund_names, 0)
-
+  # retrieve fund names from the header row in nav_data
+  # the first column (date) is skipped
+  fund_names = nav_data[0].split(',')[1:]
+  
   # initialize cashflows array
-  cashflows_halfyr = common.init_dict(fund_names, [])
-  cashflows_annual = common.init_dict(fund_names, [])
-  cashflows_overall = common.init_dict(fund_names, [])
+  cashflows = []
   
+  # initialize units dictionary
+  units_dict_halfyr = common.init_dict(fund_names)
+  units_dict_annual = common.init_dict(fund_names)
+  units_dict_overall = common.init_dict(fund_names)
+
   # initialize returns array
-  returns_halfyr = common.init_dict(fund_names, 0)
-  returns_annual = common.init_dict(fund_names, 0)
+  halfyr_returns = common.init_array_dict(fund_names)
+  annual_returns = common.init_array_dict(fund_names)
+  
+  # initialize stats array
+  perf_stats = common.init_dict(fund_names)
+  
+  returns_absolute = common.init_dict(fund_names)
+  annual_returnsized = common.init_dict(fund_names)
+  returns_stats_halfyr = common.init_array_dict(fund_names)
+  returns_stats_annual = common.init_array_dict(fund_names)
   
   # remove header line
   del nav_data[0]
 
   # compute cashflows and returns
+  print 'computing cashflows and returns ...',
   cnt = len(nav_data)
   for i in range(0, cnt):
     nav_line = nav_data[i].split(',')
     dt = datetime.strptime(nav_line[0], '%d-%m-%Y')
     
+    # half-yearly returns for each fund
+    if i % 6 == 0 and i > 0:
+      nav_line = nav_data[i].split(',')[1:]
+      fund_nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
+      wealth = get_wealth(fund_nav_dict, units_dict_halfyr)
+      for fund in fund_names:
+        cashflows_halfyr = cashflows[i-6:i]
+        cf = (dt, wealth[fund])
+        cashflows_halfyr.append(cf)
+        ret = financial.xirr(cashflows_halfyr) * 100.0
+        halfyr_returns[fund].append(ret)
+      units_dict_halfyr = common.init_dict(fund_names)
+
+    # annual returns for each fund
+    if i % 12 == 0 and i > 0:
+      nav_line = nav_data[i].split(',')[1:]
+      fund_nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
+      wealth = get_wealth(fund_nav_dict, units_dict_annual)
+      for fund in fund_names:
+        cashflows_annual = cashflows[i-12:i]
+        cf = (dt, wealth[fund])
+        cashflows_annual.append(cf)
+        ret = financial.xirr(cashflows_annual) * 100.0
+        annual_returns[fund].append(ret)
+      units_dict_annual = common.init_dict(fund_names)
+    
+    # no investment on the last date
+    if i == cnt - 1:
+      break
+    
+    # invested units
     num_cols = len(nav_line)
     for j in range(1, num_cols):
-    
-      # compute returns every 6 months
-      if i % 6 == 0 and i > 0:
-        pass
-        
-      # compute returns every year
-      if i % 12 == 0 and i > 0:
-        pass
-      
-      # No investment on the last date
-      if i == cnt - 1:
-        break
-      
-      fund = fund_names[j]
-      units = mnt_inv / float(nav_line[j])
+      fund = fund_names[j - 1]
+      nav = float(nav_line[j])
+      units = mnt_inv / nav
       units_dict_halfyr[fund] += units
       units_dict_annual[fund] += units
       units_dict_overall[fund] += units
     
-      # cash outflow
-      cf = (dt, -mnt_inv)
-      cashflows_halfyr[fund].append(cf)
-      cashflows_annual[fund].append(cf)
-      cashflows_overall[fund].append(cf)    
-      
-    break
-      
-  # total investment amount
-  num_inv = len(nav_data) - 1
+    # cash outflow
+    cf = (dt, -mnt_inv)
+    cashflows.append(cf)
+  print 'done'
+  
+  # total investment
+  num_inv = len(cashflows)
   total_inv = num_inv * mnt_inv
   
   # final wealth
   nav_line = nav_data[cnt - 1].split(',')[1:]
   fund_nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
-  for f in sorted(fund_nav_dict):
-    print f, fund_nav_dict[f]
   wealth = get_wealth(fund_nav_dict, units_dict_overall)
-
-  # absolute and annualized return
-  abs_return = {}
-  ann_return = {}
+  
+  # performance stats
+  print 'generating performance stats ...',
+  returns_absolute = {}
+  annual_returnsized = {}
   last_date = nav_data[cnt - 1].split(',')[0]
   dt = datetime.strptime(last_date, '%d-%m-%Y')
   for fund in fund_names:
+    cashflows_overall = cashflows[:]
     cf = (dt, wealth[fund])
-    cashflows_overall[fund].append(cf)
-    abs_return[fund] = ((wealth[fund] / total_inv) - 1) * 100.0
-    ann_return[fund] = financial.xirr(cashflows_overall) * 100.0
-    print '%s, %r, %r' % (fund, abs_return[fund], ann_return[fund])
+    cashflows_overall.append(cf)
+    abs_return = ((wealth[fund] / total_inv) - 1) * 100.0
+    ann_return = financial.xirr(cashflows_overall) * 100.0
+    
+    hfr = halfyr_returns[fund]
+    halfyr_return_mean = numpy.mean(hfr)
+    halfyr_return_std = numpy.std(hfr)
+    halfyr_sharpe = sharpeRanking.get_sharpe_ratio(hfr, rf_rate_halfyr)
+
+    afr = annual_returns[fund]
+    annual_return_mean = numpy.mean(afr)
+    annual_return_std = numpy.std(afr)
+    annual_sharpe = sharpeRanking.get_sharpe_ratio(afr, rf_rate_annual)
+    
+    perf_stats[fund] = (total_inv, wealth[fund], abs_return, ann_return, halfyr_return_mean, halfyr_return_std, halfyr_sharpe, annual_return_mean, annual_return_std, annual_sharpe)
+  print 'done'
   
-  pass
+  print 'writing performance stats to file ...'
+  sdf
   
-  
-  # # extract the data for each fund and process them independently
-  # fund_data = []
-  # num_cols = len(nav_data[0].split(','))
-  # for c in range(1, num_cols):
-    # del fund_data[:]
-    # num_rows = len(nav_data)
-    # for r in range(0, num_rows):
-      # row_data = nav_data[r].split(',')
-      # data_tup = (row_data[0], row_data[c])
-      # fund_data.append(data_tup)
-    # fundStats(fund_data)
-  pass
 
 def main():
   script, nav_file = sys.argv
