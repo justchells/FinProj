@@ -11,11 +11,13 @@
 # No changes required if an additional column is added
 # No changes required if additional rows are added
 
+import os
 import sys
 import numpy
 
 rfRate = 0.0075 # 9% / 12
 precision = 4
+data_dir = "data"
 
 def get_return_data(nav):
   """
@@ -29,7 +31,7 @@ def get_return_data(nav):
   for i in range(1, cnt):
     p = float(nav[i - 1])
     n = float(nav[i])
-    r = round((n / p) - 1.0, precision)
+    r = (n / p) - 1.0
     returns.append(r)
   return returns
 
@@ -178,12 +180,18 @@ def run(nav_file):
   nav_data = read_from_file(nav_file)
   print 'number of lines read: %d' % len(nav_data)
   
+  if not os.path.exists(data_dir):
+    print 'creating output directory - %s' % data_dir
+    os.mkdir(data_dir)
+  
   sharpe_data = get_sharpe_data(nav_data)
-  write_to_file('sharpeData.csv', sharpe_data)
+  sharpe_data_file = os.path.join(data_dir, 'sharpeData.csv')
+  write_to_file(sharpe_data_file, sharpe_data)
 
   nav_data_trimmed = trim_nav_data(nav_data, sharpe_data)
   sharpe_rank_data = get_sharpe_rank_data(nav_data_trimmed, sharpe_data)
-  write_to_file('sharpeRankData.csv', sharpe_rank_data)
+  sharpe_rank_data_file = os.path.join(data_dir, 'sharpeRankData.csv')
+  write_to_file(sharpe_rank_data_file, sharpe_rank_data)
   
 def main():
   """
