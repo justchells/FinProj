@@ -1,14 +1,38 @@
 #!/usr/bin/python
 
 import os
+import numpy
 
 rf_rate = 9.00 / 100.0
 
 def get_rf_rate(freq):
+  """
+  Returns the risk-free rate for the given frequency.
+  Following frequency values are supported:
+    - monthly
+    - quarterly
+    - half-yearly
+    - annual
+  If an unsupported value is used, the annual risk-free rate is returned.
+  """
   if freq == 'monthly':
     return rf_rate / 12.0
+  elif freq == 'quarterly':
+    return rf_rate / 4.0
+  elif freq == 'half-yearly':
+    return rf_rate / 2.0
   else:
     return rf_rate
+  
+def get_sharpe_ratio(return_data, rf_rate):
+  """
+  Returns the sharpe ratio for the given returns and risk-free rate.
+  """
+  
+  mean = numpy.mean(return_data)
+  stdev = numpy.std(return_data)
+  sharpe_ratio = (mean - rf_rate) / stdev
+  return sharpe_ratio
 
 def create_dir(dir_path):
   """
@@ -19,24 +43,24 @@ def create_dir(dir_path):
     os.makedirs(dir_path)
   pass
 
-def init_dict(fund_names):
+def init_dict(keys):
   """
-  Returns a dictionary using the given list of fund names.
-  The key is the fund name, the value is set to 0 (units).
+  Returns a dictionary using the given keys.
+  The value for each key is set to 0.
   """
   dict = {}
-  for f in fund_names:
-    dict[f] = 0
+  for k in keys:
+    dict[k] = 0
   return dict
 
-def init_array_dict(fund_names):
+def init_array_dict(keys):
   """
-  Returns a dictionary using the given list of fund names.
-  The key is the fund name, the value is set to 0 (units).
+  Returns a dictionary using the given keys.
+  The value for each key is set to an empty array.
   """
   dict = {}
-  for f in fund_names:
-    dict[f] = []
+  for k in keys:
+    dict[k] = []
   return dict
 
 

@@ -1,40 +1,50 @@
 #!/usr/bin/python
 
-import common
-import numpy
+import os
 import sys
-import financial
-import sharpeRanking
+import numpy
+import common
 from datetime import datetime
 
 mnt_inv = 1000
+data_dir = 'data'
+benchmark_file_name = 'benchmark.csv'
 
 def get_wealth(nav_dict, units_dict):
   """
   Calculates the portfolio value by multiplying units invested 
   in each fund with its corresponding nav.
   """
+  
   wealth = 0.0
   for fund in units_dict:
     wealth += float(nav_dict[fund]) * float(units_dict[fund])
   return wealth
   
-def stats(nav_data, rank_data):
+def run(nav_file, rank_file):
   """
   Generates return statistics based on sharpe ratio ranking data.
   """
+
+  # create data directory
+  common.create_dir(data_dir)
+
+  # read data files
+  nav_data = common.read_from_file(nav_file)
+  rank_data = common.read_from_file(rank_file)
   
   # remove redundant entries in nav_data
   target_date = rank_data[1].split(',')[0]
   common.trim_data(nav_data, target_date)
+  assert len(nav_data) == len(rank_data)
 
   # retrieve fund names
   fund_names = nav_data[0].split(',')[1:]
 
   # initialize units dictionary
-  units_dict_halfyr = common.init_dict(fund_names, 0)
-  units_dict_annual = common.init_dict(fund_names, 0)
-  units_dict_overall = common.init_dict(fund_names, 0)
+  units_dict_halfyr = common.init_dict(fund_names)
+  units_dict_annual = common.init_dict(fund_names)
+  units_dict_overall = common.init_dict(fund_names)
     
   # initialize cashflows array
   cashflows_halfyr = []
@@ -59,11 +69,11 @@ def stats(nav_data, rank_data):
     # compute returns every 6 months
     if i % 6 == 0 and i > 0:
       nav_line = nav_data[i].split(',')[1:]
-      nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
-      wealth = get_wealth(nav_dict, units_dict_halfyr)
+      fund_nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
+      wealth = get_wealth(fund_nav_dict, units_dict_halfyr)
       cf = (dt, wealth)
       cashflows_halfyr.append(cf)
-      ret = financial.xirr(cashflows_halfyr) * 100.0
+      ret = common.xirr(cashflows_halfyr)
       returns_halfyr.append(ret)
       del cashflows_halfyr[:]
       for f in units_dict_halfyr:
@@ -76,7 +86,7 @@ def stats(nav_data, rank_data):
       wealth = get_wealth(nav_dict, units_dict_annual)
       cf = (dt, wealth)
       cashflows_annual.append(cf)
-      ret = financial.xirr(cashflows_annual) * 100.0
+      ret = common.xirr(cashflows_annual)
       returns_annual.append(ret)
       del cashflows_annual[:]
       for f in units_dict_annual:
@@ -98,77 +108,67 @@ def stats(nav_data, rank_data):
     cashflows_annual.append(cf)
     cashflows_overall.append(cf)
   
-  # total investment amount
-  num_inv = len(nav_data) - 1
+  file_data = []
+  
+  # investment details
+  file_data.append('Investment Details')
+  file_data.append('Fund,Units')
+  for f in units_dict_overall:
+    if units_dict_overall[f] > 0:
+      line_data = f + ','  + str(units_dict_overall[f])
+      file_data.append(line_data)
+  file_data.append('\n')
+  
+  # total investment
+  num_inv = len(cashflows_overall)
   total_inv = num_inv * mnt_inv
+  file_data.append('Investment,' + str(total_inv))
   
   # final wealth
   nav_line = nav_data[cnt - 1].split(',')[1:]
   fund_nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
   wealth = get_wealth(fund_nav_dict, units_dict_overall)
+  file_data.append('Wealth,' + str(wealth))
   
   # absolute return
-  abs_return = ((wealth / total_inv) - 1) * 100.0
+  abs_return = ((wealth / total_inv) - 1)
+  file_data.append('Absolute Return,' + str(abs_return))
   
   # annualized return
   last_date = nav_data[cnt - 1].split(',')[0]
   dt = datetime.strptime(last_date, '%d-%m-%Y')
   cf = (dt, wealth)
   cashflows_overall.append(cf)
-  annual_return = financial.xirr(cashflows_overall) * 100.0
-
-  print '\n'
-  print 'Final Investment'
-  print '----------------'
-  for f in units_dict_overall:
-    if units_dict_overall[f] > 0:
-      print f, round(units_dict_overall[f], 2)
+  annual_return = common.xirr(cashflows_overall)
+  file_data.append('Annualized Return,' + str(annual_return))
   
-  print '\n'
-  print 'Performance Measures'
-  print '--------------------'
-  print 'Investment | %s' % "{:,}".format(total_inv)  
-  print 'Wealth | %s' % "{:,}".format(int(round(wealth)))
-  print 'Absolute return | %s%%' % round(abs_return, 2)
-  print 'Annual return | %s%%' % round(annual_return, 2)
-  print '\n'
-
-  rf_rate_halfyr = 4.5
-  rf_rate_annual = 9.0
+  file_data.append('\n')
+  file_data.append('Stats,Mean,Std Deviation, Sharpe Ratio')
   
-  print 'Half-Yearly Returns'
-  print '-------------------'
-  print ''
-  for r in returns_halfyr:
-    print '%s%%' % round(r, 2)
-  print ''
-  print 'Number of data points | %d' % len(returns_halfyr)
-  print 'Average | %s%%' % round(numpy.mean(returns_halfyr), 2)
-  print 'Standard Deviation | %s%%' % round(numpy.std(returns_halfyr), 2)
-  print 'Sharpe Ratio | %r' % round(sharpeRanking.get_sharpe_ratio(returns_halfyr, rf_rate_halfyr), 2)
-  print '\n'
+  # half-yearly return stats
+  halfyr_rf_rate = common.get_rf_rate('half-yearly')
+  halfyr_mean = numpy.mean(returns_halfyr)
+  halfyr_stdev = numpy.std(returns_halfyr)
+  halfyr_sharpe = common.get_sharpe_ratio(returns_halfyr, halfyr_rf_rate)
+  file_data.append('Half-Yearly,' + str(halfyr_mean) + ',' + str(halfyr_stdev) + ',' + str(halfyr_sharpe))
+  
+  # annual return stats
+  annual_rf_rate = common.get_rf_rate('annual')
+  annual_mean = numpy.mean(returns_annual)
+  annual_stdev = numpy.std(returns_annual)
+  annual_sharpe = common.get_sharpe_ratio(returns_annual, annual_rf_rate)
+  file_data.append('Annual,' + str(annual_mean) + ',' + str(annual_stdev) + ',' + str(annual_sharpe))
+  
+  # save stats to file
+  benchmark_file = os.path.join(data_dir, benchmark_file_name)
+  common.write_to_file(benchmark_file, file_data)
 
-  print 'Annual Returns'
-  print '--------------'
-  print ''
-  for r in returns_annual:
-    print '%s%%' % round(r, 2)
-  print ''
-  print 'Number of data points | %d' % len(returns_annual)
-  print 'Average | %s%%' % round(numpy.mean(returns_annual), 2)
-  print 'Standard Deviation | %s%%' % round(numpy.std(returns_annual), 2)
-  print 'Sharpe Ratio | %r' % round(sharpeRanking.get_sharpe_ratio(returns_annual, rf_rate_annual), 2)
-  print '\n'
   
 def main():
-  """
-  Defined for command line. 
-  Reads the file contents and calls stats().
-  """
-  script, nav_file, sharpe_rank_file = sys.argv
-  nav_data = sharpeRanking.read_from_file(nav_file)
-  rank_data = sharpeRanking.read_from_file(sharpe_rank_file)
-  stats(nav_data, rank_data)
+  script, nav_file, rank_file = sys.argv
+  run(nav_file, rank_file)
+
   
 if __name__ == '__main__':
   main()
+
