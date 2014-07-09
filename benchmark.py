@@ -39,22 +39,19 @@ def run(nav_file, rank_file):
   assert len(nav_data) == len(rank_data)
 
   # retrieve fund names
+  # the first column (date) is skipped
   fund_names = nav_data[0].split(',')[1:]
 
-  # initialize units dictionary
-  units_dict_halfyr = common.init_dict(fund_names)
-  units_dict_annual = common.init_dict(fund_names)
-  units_dict_overall = common.init_dict(fund_names)
-    
-  # initialize cashflows array
+  # initialize
   cashflows_halfyr = []
   cashflows_annual = []
   cashflows_overall = []
-  
-  # initialize returns array
   returns_halfyr = []
   returns_annual = []
-  
+  units_dict_halfyr = common.init_dict(fund_names)
+  units_dict_annual = common.init_dict(fund_names)
+  units_dict_overall = common.init_dict(fund_names)
+
   # remove header line
   del nav_data[0]
   del rank_data[0] 
@@ -66,7 +63,7 @@ def run(nav_file, rank_file):
     (date, fund, nav) = rank_data[i].split(',')
     dt = datetime.strptime(date, '%d-%m-%Y')
   
-    # compute returns every 6 months
+    # half-yearly returns
     if i % 6 == 0 and i > 0:
       nav_line = nav_data[i].split(',')[1:]
       fund_nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
@@ -75,11 +72,12 @@ def run(nav_file, rank_file):
       cashflows_halfyr.append(cf)
       ret = common.xirr(cashflows_halfyr)
       returns_halfyr.append(ret)
+
+      # clean up for next pass
       del cashflows_halfyr[:]
-      for f in units_dict_halfyr:
-        units_dict_halfyr[f] = 0
+      units_dict_halfyr[f] = common.init_dict(fund_names)
       
-    # compute returns every year
+    # annual returns
     if i % 12 == 0 and i > 0:
       nav_line = nav_data[i].split(',')[1:]
       nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
@@ -88,11 +86,12 @@ def run(nav_file, rank_file):
       cashflows_annual.append(cf)
       ret = common.xirr(cashflows_annual)
       returns_annual.append(ret)
+
+      # clean up for next pass
       del cashflows_annual[:]
-      for f in units_dict_annual:
-        units_dict_annual[f] = 0
+      units_dict_annual[f] = common.init_dict(fund_names)
     
-    # No investment on the last date
+    # no investment on the last date
     if i == cnt - 1:
       break
     
