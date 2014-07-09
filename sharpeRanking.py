@@ -1,203 +1,183 @@
 #!/usr/bin/python
 
-# LOGIC
-# generate the sharpe ratio for each month based on returns of last 12 months
-# create an output file containing sharpe ratio for each month under each fund (date, fund1, fund2, etc.)
-# using this file, compute the rank for each month based on the highest sharpe ratio
-# create an output file with the highest ranked fund for each month, including its NAV (date, fund, nav)
-
-# CONDITIONS
-# No changes required if an additional column is added
-# No changes required if additional rows are added
-
 import os
 import sys
 import numpy
+import common
 
-rfRate = 0.0075 # 9% / 12
-precision = 4
-data_dir = "data"
+data_dir = 'data'
+sharpe_data_file_name = 'sharpeData.csv'
+sharpe_rank_file_name = 'sharpeRank.csv'
 
-def get_return_data(nav):
+def get_return_data(nav_data):
   """
-  Returns a list with the returns for each month for the given nav.
+  Returns a list with the monthly returns for each fund.
+  """
   
-  Expected format for nav -> [nav]
-  Output format -> [return]
-  """
   returns = []
-  cnt = len(nav)
+  cnt = len(nav_data)
   for i in range(1, cnt):
-    p = float(nav[i - 1])
-    n = float(nav[i])
+    p = float(nav_data[i - 1])
+    n = float(nav_data[i])
     r = (n / p) - 1.0
     returns.append(r)
   return returns
 
 def get_sharpe_ratio(return_data, rf_rate):
   """
-  Returns the sharpe ratio for the given nav.
-  
-  Expected format for nav -> [nav]
+  Returns the sharpe ratio for the given returns and risk-free rate.
   """
+  
   mean = numpy.mean(return_data)
   stdev = numpy.std(return_data)
-  sharpe_ratio = round((mean - rf_rate) / stdev, precision)
+  sharpe_ratio = (mean - rf_rate) / stdev
   return sharpe_ratio
   
 def get_sharpe_data(nav_data):
   """
-  Returns a list with the sharpe ratio for each month under each fund.
+  Returns a list with the monthly sharpe ratio for each fund.
+  A rolling window of last 12 months is used to compute the sharpe ratio.
   
-  Expected format for nav_data -> [date, nav1, nav2, ...]
-  Output format -> [date, sharpe1, sharpe2, ...]
+  Input Format
+  ------------
+  Date, NAV1, NAV2, NAV3, ...
+  
+  Output Format
+  -------------
+  Date, Sharpe1, Sharpe2, Sharpe3, ...
   """
-  sharpe_data = []
 
+  sharpe_data = []
+  rf_rate = common.get_rf_rate('monthly')
+  print rf_rate
+  
   # save header row
   header = nav_data[0]
   sharpe_data.append(header)
   
-  # initialize the column dictionary
-  colDict = {}
-  colNum = len(header.split(','))
-  for i in range(1, colNum):
-    colDict[i] = []
-  
-  # loop through the rows
+  # initialize dictionary that will hold nav for last 12 months for each fund
+  nav_dict = {}
+  num_cols = len(header.split(','))
+  for i in range(1, num_cols):
+    nav_dict[i] = []
+
+  # monthly sharpe ratio
+  # header row is skipped
   cnt = len(nav_data)
   for i in range(1, cnt):
-    line = nav_data[i]
-    cols = line.split(',')
     
-    # add nav to respective list in dictionary
-    for j in range(1, colNum):
-      colDict[j].append(cols[j]) 
+    nav_line = nav_data[i].split(',')
+    
+    # add nav to respective list in nav dictionary
+    for j in range(1, num_cols):
+      nav_dict[j].append(nav_line[j]) 
 
     # rolling window of last 12 months
-    if len(colDict[1]) > 12:
-      line = []
-      line.append(str(cols[0]))
+    if len(nav_dict[1]) > 12:
+      row = []
       
-      # compute the sharpe ratio for each fund
-      for j in range(1, colNum):
-        return_data = get_return_data(colDict[j])
-        sharpe_ratio = get_sharpe_ratio(return_data, rfRate)
-        line.append(str(sharpe_ratio))
-        colDict[j].pop(0) # remove the first element to move the window
+      # date column
+      row.append(str(nav_line[0])) 
+      
+      # compute sharpe ratio for each fund
+      for j in range(1, num_cols):
+        return_data = get_return_data(nav_dict[j])
+        sharpe_ratio = get_sharpe_ratio(return_data, rf_rate)
+        row.append(str(sharpe_ratio))
+        
+        # remove the first element to move the window
+        nav_dict[j].pop(0) 
     
-      data = ','.join(line)
-      sharpe_data.append(data)
+      line_data = ','.join(row)
+      sharpe_data.append(line_data)
 
   return sharpe_data
-
-def trim_nav_data(nav_data, sharpe_data):
-  """
-  Trims the elements from the head of nav_data list until the date matches the
-  first entry in the sharpe_data list.
-  """
-  target_date = sharpe_data[1].split(',')[0]
-  i = 0
-  cnt = len(nav_data)
-  for i in range(0, cnt):
-    dt = nav_data[i].split(',')[0]
-    if dt == target_date:
-      break
-  del nav_data[1:i]
-  return nav_data
   
 def get_sharpe_rank_data(nav_data, sharpe_data):
   """
-  Returns a list with the highest ranked fund for each month based on sharpe 
-  ratio. The input parameter, sharpe_data, is a list with all applicable funds 
-  and their corresponding sharpe ratio. Input parameters, nav_data and 
-  sharpe_data should be of the same length.
+  Returns a list with the highest ranked fund for each month.
+  The ranking is based on the monthly sharpe ratio. 
   
-  Expected format for nav_data -> [date, nav1, nav2, ...]
-  Expected format for sharpe_data -> [date, sharpe1, sharpe2, ...]
-  Output format -> [date, fund, nav]
+  Input Format
+  ------------
+  nav_data -> Date, NAV1, NAV2, NAV3, ...
+  sharpe_data -> Date, Sharpe1, Sharpe2, Sharpe3, ...
+  
+  Output Format
+  -------------
+  Date, Fund, NAV
   """
   
-  sharpe_rank_data = ["Date,Fund,NAV"]
+  sharpe_rank_data = []
+  
+  header_line = 'Date,Fund,NAV'
+  sharpe_rank_data.append(header_line)
   
   # ensure both arrays are of the same length
+  target_date = sharpe_data[1].split(',')[0]
+  common.trim_data(nav_data, target_date)
   assert len(nav_data) == len(sharpe_data)
   
-  # initialize the dictionary
-  fundDict = {}
-  header = nav_data[0]
-  cols = header.split(',')
-  colNum = len(cols)
-  for i in range(0, colNum):
-    fundDict[i] = cols[i]
+  # initialize a dictionary for accessing fund names based on the column index
+  # {key, value} = {columnIndex, fundName}
+  col_fund_dict = {}
+  header_row = nav_data[0].split(',')
+  num_cols = len(header_row)
+  for i in range(0, num_cols):
+    col_fund_dict[i] = header_row[i]
 
-  # loop through the rows
-  rowNum = len(sharpe_data)
-  for i in range(1, rowNum):
-    line = sharpe_data[i].split(',')
-    maxInd = 1
-    maxVal = line[1]
-    for j in range(1, colNum):
-      if float(line[j]) > float(line[maxInd]):
-        maxInd = j
-        maxVal = line[j]
-    data_line = line[0] + "," + fundDict[maxInd] + "," + nav_data[i].split(',')[maxInd]
-    sharpe_rank_data.append(data_line)
+  # rank funds based on sharpe ratio
+  # header row is skipped
+  num_rows = len(sharpe_data)
+  for i in range(1, num_rows):
+    row_data = sharpe_data[i].split(',')
+    
+    # identify the fund with the highest sharpe ratio for the month
+    max_ind = 1
+    max_val = row_data[1]
+    for j in range(1, num_cols):
+      if float(row_data[j]) > float(row_data[max_ind]):
+        max_ind = j
+        max_val = row_data[j]
+    
+    date = row_data[0]
+    fund = col_fund_dict[max_ind]
+    nav = nav_data[i].split(',')[max_ind]
+    line_data = date + "," + fund + "," + nav
+    sharpe_rank_data.append(line_data)
     
   return sharpe_rank_data
 
-def read_from_file(input_file):
-  """
-  Returns the file contents in a list.
-  The EOL character \n is stripped from each line.
-  """
-  msg = 'reading from %s ...' % (input_file)
-  print msg,
-  file_data = []
-  with open(input_file, 'r') as f:
-    for line in f:
-      file_data.append(line.rstrip())
-  print 'done'
-  return file_data
-
-def write_to_file(output_file, file_data):
-  """
-  Write the file data to the output file.
-  """
-  msg = 'Writing to %s ...' % (output_file)
-  print msg,
-  with open(output_file, 'w') as f:
-    for d in file_data:
-      line = str(d) + '\n'
-      f.write(line)
-  print 'done'
-
 def run(nav_file):
   """
-  Executes the logic as defined for this module.
+  Generates monthly sharpe ratio for each fund using a rolling window of the 
+  last 12 months. Uses this data to generate a rank file that specifies which 
+  fund to invest in each month. The fund chosen each month is the one with the 
+  highest sharpe ratio.
   """
-  nav_data = read_from_file(nav_file)
-  print 'number of lines read: %d' % len(nav_data)
   
-  if not os.path.exists(data_dir):
-    print 'creating output directory - %s' % data_dir
-    os.mkdir(data_dir)
+  # create data directory
+  common.create_dir(data_dir)
   
+  # read nav data
+  nav_data = common.read_from_file(nav_file)
+  
+  # generate monthly sharpe ratio
   sharpe_data = get_sharpe_data(nav_data)
-  sharpe_data_file = os.path.join(data_dir, 'sharpeData.csv')
-  write_to_file(sharpe_data_file, sharpe_data)
+  sharpe_data_file = os.path.join(data_dir, sharpe_data_file_name)
+  common.write_to_file(sharpe_data_file, sharpe_data)
 
-  nav_data_trimmed = trim_nav_data(nav_data, sharpe_data)
-  sharpe_rank_data = get_sharpe_rank_data(nav_data_trimmed, sharpe_data)
-  sharpe_rank_data_file = os.path.join(data_dir, 'sharpeRankData.csv')
-  write_to_file(sharpe_rank_data_file, sharpe_rank_data)
+  # generate sharpe ranking
+  sharpe_rank_data = get_sharpe_rank_data(nav_data, sharpe_data)
+  sharpe_rank_data_file = os.path.join(data_dir, sharpe_rank_file_name)
+  common.write_to_file(sharpe_rank_data_file, sharpe_rank_data)
+
   
 def main():
-  """
-  Main function. Used for command line. Call run().
-  """
   script, nav_file = sys.argv
   run(nav_file)
   
+  
 if __name__ == '__main__':
   main()
+
