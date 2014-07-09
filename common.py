@@ -2,7 +2,7 @@
 
 import os
 
-rf_rate = 9.00
+rf_rate = 9.00 / 100.0
 
 def get_rf_rate(freq):
   if freq == 'monthly':
