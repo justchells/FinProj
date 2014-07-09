@@ -23,15 +23,6 @@ def get_return_data(nav_data):
     returns.append(r)
   return returns
 
-def get_sharpe_ratio(return_data, rf_rate):
-  """
-  Returns the sharpe ratio for the given returns and risk-free rate.
-  """
-  
-  mean = numpy.mean(return_data)
-  stdev = numpy.std(return_data)
-  sharpe_ratio = (mean - rf_rate) / stdev
-  return sharpe_ratio
   
 def get_sharpe_data(nav_data):
   """
@@ -49,7 +40,6 @@ def get_sharpe_data(nav_data):
 
   sharpe_data = []
   rf_rate = common.get_rf_rate('monthly')
-  print rf_rate
   
   # save header row
   header = nav_data[0]
@@ -82,7 +72,7 @@ def get_sharpe_data(nav_data):
       # compute sharpe ratio for each fund
       for j in range(1, num_cols):
         return_data = get_return_data(nav_dict[j])
-        sharpe_ratio = get_sharpe_ratio(return_data, rf_rate)
+        sharpe_ratio = common.get_sharpe_ratio(return_data, rf_rate)
         row.append(str(sharpe_ratio))
         
         # remove the first element to move the window
