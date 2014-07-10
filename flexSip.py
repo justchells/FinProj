@@ -6,14 +6,9 @@ import numpy
 import common
 from datetime import datetime
 
-data_dir = 'data'
 default_inv = 1000
-max_inv = 0
+data_dir = 'data'
 flex_stp_file_name = 'flexStp.csv'
-
-def get_flex_stp_inv(index, fund_inv, fund_value, max_inv):
-  
-  return mnt_inv
 
 def run(nav_file):
   

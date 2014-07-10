@@ -46,6 +46,7 @@ def get_sharpe_data(nav_data):
   sharpe_data.append(header)
   
   # initialize dictionary that will hold nav for last 12 months for each fund
+  # {key, value} -> {columnIndex, emptyArray}
   nav_dict = {}
   num_cols = len(header.split(','))
   for i in range(1, num_cols):
