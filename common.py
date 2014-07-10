@@ -43,16 +43,17 @@ def create_dir(dir_path):
     os.makedirs(dir_path)
   pass
 
-def init_dict(keys):
+def init_dict(keys, value=0):
   """
   Returns a dictionary using the given keys.
-  The value for each key is set to 0.
+  The value for each key is set to the given value.
   """
   dict = {}
   for k in keys:
-    dict[k] = 0
+    dict[k] = value
   return dict
 
+  
 def init_array_dict(keys):
   """
   Returns a dictionary using the given keys.
@@ -73,7 +74,7 @@ def get_fund_nav_dict(fund_names, fund_nav):
   cnt = len(fund_nav)
   for i in range(0, cnt):
     fund = fund_names[i]
-    nav = fund_nav[i]
+    nav = float(fund_nav[i])
     fund_nav_dict[fund] = nav
   return fund_nav_dict
 

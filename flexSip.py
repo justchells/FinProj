@@ -45,10 +45,10 @@ def run(nav_file):
     row_data = nav_data[i].split(',')
     dt = datetime.strptime(row_data[0], '%d-%m-%Y')
     fund_nav = row_data[1:]
-    
+    fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
+      
     # half-yearly returns for each fund
     if i % 6 == 0 and i > 0:
-      fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
       wealth = common.get_fund_wealth(fund_nav_dict, units_dict_halfyr)
       for fund in fund_names:
         cashflows_halfyr = cashflows[fund][i-6:i] # slice last 6 months cashflows
@@ -62,7 +62,6 @@ def run(nav_file):
     
     # annual returns for each fund
     if i % 12 == 0 and i > 0:
-      fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
       wealth = common.get_fund_wealth(fund_nav_dict, units_dict_annual)
       for fund in fund_names:
         cashflows_annual = cashflows[fund][i-12:i] # slice last 12 months cashflows
@@ -79,14 +78,11 @@ def run(nav_file):
       break
     
     # portfolio value
-    fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
     wealth = common.get_fund_wealth(fund_nav_dict, units_dict_overall)
     
     # units and cashflows
-    num_funds = len(fund_nav)
-    for j in range(0, num_funds):
-      fund = fund_names[j]
-      nav = float(fund_nav[j])
+    for fund in fund_names:
+      nav = fund_nav_dict[fund]
       fund_value = wealth[fund]
       fund_inv = fund_inv_dict[fund]
       
