@@ -6,28 +6,34 @@ import numpy
 import common
 from datetime import datetime
 
-mnt_inv = 1000
 data_dir = 'data'
-regular_sip_file_name = 'regularSip.csv'
+default_inv = 1000
+max_inv = 0
+flex_stp_file_name = 'flexStp.csv'
+
+def get_flex_stp_inv(index, fund_inv, fund_value, max_inv):
+  
+  return mnt_inv
 
 def run(nav_file):
   
   # create data directory
   common.create_dir(data_dir)
-  
+
   # read nav data
   nav_data = common.read_from_file(nav_file)
   
-  # remove first 12 entries in nav_data 
+  # remove first 12 entries in nav_data
   # to compare results with benchmark
   del nav_data[1:13]
-
+  
   # retrieve fund names
   # the first column (date) is skipped
   fund_names = nav_data[0].split(',')[1:]
-  
+
   # initialize
-  cashflows = []
+  cashflows = common.init_array_dict(fund_names)
+  fund_inv_dict = common.init_dict(fund_names)
   returns_halfyr = common.init_array_dict(fund_names)
   returns_annual = common.init_array_dict(fund_names)
   units_dict_halfyr = common.init_dict(fund_names)
@@ -36,11 +42,11 @@ def run(nav_file):
   
   # remove header line
   del nav_data[0]
-
-  # compute cashflows and returns
+  
   cnt = len(nav_data)
+  max_inv = default_inv * (cnt - 1)
   for i in range(0, cnt):
-
+  
     row_data = nav_data[i].split(',')
     dt = datetime.strptime(row_data[0], '%d-%m-%Y')
     fund_nav = row_data[1:]
@@ -50,7 +56,7 @@ def run(nav_file):
       fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
       wealth = common.get_fund_wealth(fund_nav_dict, units_dict_halfyr)
       for fund in fund_names:
-        cashflows_halfyr = cashflows[i-6:i] # slice last 6 months cashflows
+        cashflows_halfyr = cashflows[fund][i-6:i] # slice last 6 months cashflows
         cf = (dt, wealth[fund])
         cashflows_halfyr.append(cf)
         ret = common.xirr(cashflows_halfyr)
@@ -58,13 +64,13 @@ def run(nav_file):
 
       # clean up for next pass
       units_dict_halfyr = common.init_dict(fund_names)
-
+    
     # annual returns for each fund
     if i % 12 == 0 and i > 0:
       fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
       wealth = common.get_fund_wealth(fund_nav_dict, units_dict_annual)
       for fund in fund_names:
-        cashflows_annual = cashflows[i-12:i] # slice last 12 months cashflows
+        cashflows_annual = cashflows[fund][i-12:i] # slice last 12 months cashflows
         cf = (dt, wealth[fund])
         cashflows_annual.append(cf)
         ret = common.xirr(cashflows_annual)
@@ -77,20 +83,30 @@ def run(nav_file):
     if i == cnt - 1:
       break
     
-    # invested units
+    # portfolio value
+    fund_nav_dict = common.get_fund_nav_dict(fund_names, fund_nav)
+    wealth = common.get_fund_wealth(fund_nav_dict, units_dict_overall)
+    
+    # units and cashflows
     num_funds = len(fund_nav)
     for j in range(0, num_funds):
       fund = fund_names[j]
       nav = float(fund_nav[j])
+      fund_value = wealth[fund]
+      fund_inv = fund_inv_dict[fund]
+      
+      # flex stp formula for calculating monthly investment
+      mnt_inv = max(default_inv, default_inv * (i + 1) - fund_value)
+      mnt_inv = min(mnt_inv, max_inv - fund_inv)
+      fund_inv_dict[fund] += mnt_inv
+      
       units = mnt_inv / nav
       units_dict_halfyr[fund] += units
       units_dict_annual[fund] += units
       units_dict_overall[fund] += units
-    
-    # cash outflow
-    cf = (dt, -mnt_inv)
-    cashflows.append(cf)
-  
+      cf = (dt, -mnt_inv)
+      cashflows[fund].append(cf)
+
   file_data = []
   
   header_line = \
@@ -98,10 +114,6 @@ def run(nav_file):
     'Half-Yr Return Mean,Half-Yr Return Std Dev,Half-Yr Sharpe,' + \
     'Annual Return Mean,Annual Return Std Dev,Annual Sharpe'
   file_data.append(header_line)
-    
-  # total investment
-  num_inv = len(cashflows)
-  total_inv = num_inv * mnt_inv
   
   # final wealth
   nav_line = nav_data[cnt - 1].split(',')[1:]
@@ -111,13 +123,14 @@ def run(nav_file):
   # performance stats for each fund
   last_date = nav_data[cnt - 1].split(',')[0]
   dt = datetime.strptime(last_date, '%d-%m-%Y')
-  for fund in sorted(fund_names):
-    fund_cashflows = cashflows[:]
+  for fund in sorted(fund_names):  
+    fund_cashflows = cashflows[fund][:]
     cf = (dt, wealth[fund])
     fund_cashflows.append(cf)
-    abs_return = ((wealth[fund] / total_inv) - 1)
+    fund_inv = fund_inv_dict[fund]
+    abs_return = ((wealth[fund] / fund_inv) - 1)
     ann_return = common.xirr(fund_cashflows)
-    
+
     hfr = returns_halfyr[fund]
     halfyr_rf_rate = common.get_rf_rate('half-yearly')
     halfyr_return_mean = numpy.mean(hfr)
@@ -129,19 +142,19 @@ def run(nav_file):
     annual_return_mean = numpy.mean(afr)
     annual_return_std = numpy.std(afr)
     annual_sharpe = common.get_sharpe_ratio(afr, annual_rf_rate)
-    
+  
     line_data = \
-      fund + ',' + str(total_inv) + ',' + str(wealth[fund]) + ',' + \
+      fund + ',' + str(fund_inv) + ',' + str(wealth[fund]) + ',' + \
       str(abs_return) + ',' + str(ann_return) + ',' + \
       str(halfyr_return_mean) + ',' + str(halfyr_return_std) + ',' + \
       str(halfyr_sharpe) + ',' + str(annual_return_mean) + ',' + \
       str(annual_return_std) + ',' + str(annual_sharpe)
     file_data.append(line_data)
-
-  regular_sip_file = os.path.join(data_dir, regular_sip_file_name)
-  common.write_to_file(regular_sip_file, file_data)
   
+  flex_stp_file = os.path.join(data_dir, flex_stp_file_name)
+  common.write_to_file(flex_stp_file, file_data)
   
+      
 def main():
   script, nav_file = sys.argv
   run(nav_file)

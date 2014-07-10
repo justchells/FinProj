@@ -64,18 +64,25 @@ def init_array_dict(keys):
   return dict
 
 
-def get_fund_nav_dict(fund_names, nav_line):
+def get_fund_nav_dict(fund_names, fund_nav):
   """
   Returns a dictionary using the given parameters.
   The key is the fund name, the value is the nav.
   """
   fund_nav_dict = {}
-  cnt = len(nav_line)
+  cnt = len(fund_nav)
   for i in range(0, cnt):
     fund = fund_names[i]
-    nav = nav_line[i]
+    nav = fund_nav[i]
     fund_nav_dict[fund] = nav
   return fund_nav_dict
+
+def get_fund_wealth(nav_dict, units_dict):
+  wealth = {}
+  for fund in units_dict:
+    wealth[fund] = float(nav_dict[fund]) * float(units_dict[fund])
+  return wealth
+
   
 def trim_data(nav_data, target_date):
   """
