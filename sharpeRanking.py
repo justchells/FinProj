@@ -15,14 +15,15 @@ def get_return_data(nav_data):
   Returns a list with the monthly returns for each fund.
   """
   
-  returns = []
+  n = nav_data
   cnt = len(nav_data)
-  for i in range(1, cnt):
-    p = float(nav_data[i - 1])
-    n = float(nav_data[i])
-    r = (n / p) - 1.0
-    returns.append(r)
-  return returns
+  return [ ((n[i] / n[i-1]) - 1) for i in xrange(1, cnt) ]
+  # for i in xrange(1, cnt):
+    # p = float(nav_data[i - 1])
+    # n = float(nav_data[i])
+    # r = (n / p) - 1.0
+    # returns.append(r)
+  # return returns
 
 def get_sharpe_data(nav_data):
   """
@@ -49,24 +50,29 @@ def get_sharpe_data(nav_data):
   # {key, value} -> {columnIndex, emptyArray}
   #nav_dict = {}
   num_cols = len(header.split(','))
-  # for i in range(1, num_cols):
+  # for i in xrange(1, num_cols):
     # nav_dict[i] = []
   nav_dict = defaultdict(list)
     
   # monthly sharpe ratio
   # header row is skipped
   # cnt = len(nav_data)
-  # for i in range(1, cnt):
+  # for i in xrange(1, cnt):
     # nav_line = nav_data[i].split(',')
 
-  row_data = nav_data[1:]
-  for r in row_data:
-    
+  # row_data = nav_data[1:]
+  # for r in row_data:
+  
+  for i, r in enumerate(nav_data):
+  
+    # skip header row
+    if i == 0: continue
+  
     nav_line = r.split(',')
     
     # add nav to respective list in nav dictionary
-    for j in range(1, num_cols):
-      nav_dict[j].append(nav_line[j]) 
+    for j in xrange(1, num_cols):
+      nav_dict[j].append(float(nav_line[j])) 
 
     # rolling window of last 12 months
     if len(nav_dict[1]) > 12:
@@ -76,7 +82,7 @@ def get_sharpe_data(nav_data):
       row.append(str(nav_line[0])) 
       
       # compute sharpe ratio for each fund
-      for j in range(1, num_cols):
+      for j in xrange(1, num_cols):
         return_data = get_return_data(nav_dict[j])
         sharpe_ratio = common.get_sharpe_ratio(return_data, rf_rate)
         row.append(str(sharpe_ratio))
@@ -119,19 +125,19 @@ def get_sharpe_rank_data(nav_data, sharpe_data):
   col_fund_dict = {}
   header_row = nav_data[0].split(',')
   num_cols = len(header_row)
-  for i in range(0, num_cols):
+  for i in xrange(num_cols):
     col_fund_dict[i] = header_row[i]
 
   # rank funds based on sharpe ratio
   # header row is skipped
   num_rows = len(sharpe_data)
-  for i in range(1, num_rows):
+  for i in xrange(1, num_rows):
     row_data = sharpe_data[i].split(',')
     
     # identify the fund with the highest sharpe ratio for the month
     max_ind = 1
     max_val = row_data[1]
-    for j in range(1, num_cols):
+    for j in xrange(1, num_cols):
       if float(row_data[j]) > float(row_data[max_ind]):
         max_ind = j
         max_val = row_data[j]
