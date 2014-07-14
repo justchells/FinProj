@@ -4,6 +4,7 @@ import os
 import sys
 import numpy
 import common
+from collections import defaultdict
 
 data_dir = 'data'
 sharpe_data_file_name = 'sharpeData.csv'
@@ -23,7 +24,6 @@ def get_return_data(nav_data):
     returns.append(r)
   return returns
 
-  
 def get_sharpe_data(nav_data):
   """
   Returns a list with the monthly sharpe ratio for each fund.
@@ -47,17 +47,22 @@ def get_sharpe_data(nav_data):
   
   # initialize dictionary that will hold nav for last 12 months for each fund
   # {key, value} -> {columnIndex, emptyArray}
-  nav_dict = {}
+  #nav_dict = {}
   num_cols = len(header.split(','))
-  for i in range(1, num_cols):
-    nav_dict[i] = []
-
+  # for i in range(1, num_cols):
+    # nav_dict[i] = []
+  nav_dict = defaultdict(list)
+    
   # monthly sharpe ratio
   # header row is skipped
-  cnt = len(nav_data)
-  for i in range(1, cnt):
+  # cnt = len(nav_data)
+  # for i in range(1, cnt):
+    # nav_line = nav_data[i].split(',')
+
+  row_data = nav_data[1:]
+  for r in row_data:
     
-    nav_line = nav_data[i].split(',')
+    nav_line = r.split(',')
     
     # add nav to respective list in nav dictionary
     for j in range(1, num_cols):
