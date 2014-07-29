@@ -1,0 +1,32 @@
+Requirements
+------------
+
+Work on NAV data files (rows - months, columns - funds)
+Should be able to add rows and columns without needing to change any code
+In all cases, the first year of data is ignored
+Sharpe ratio for each case is computed on monthly returns 
+  (except for top ranked which is based on last 12 months return data)
+
+Investment Options  
+  - Regular SIP (benchmark)
+  - Flex STP
+  - Regular MA
+  - Inverted MA (last 3,6,9,12 months, with/without debt)
+  - Top Ranked
+  - Other ranks (top 2,3, bottom 1,2,3)
+  - Timing
+  
+Individual Measures 
+  - investment
+  - final wealth
+  - annualized return
+  - sharpe
+
+Group Measures
+  - Average
+  - Std. Deviation
+
+Comparison
+  - Same fund across different investment options  
+
+  
