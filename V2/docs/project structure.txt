@@ -1,0 +1,31 @@
+Project Structure
+------------------
+
+/
+ - run.py (main file)
+ - common.py
+ - regularSip.py
+ - flexStp.py 
+ - ma.py (supports both regular and inverted)
+ - ranked.py (supports top 1,2,3 & bottom 1,2,3)
+ - timing.py
+
+data/
+ - navData.csv
+
+tmp/
+ - sharpeData.csv
+ - sharpeRank.csv
+ 
+output/
+ - regularSip.csv
+ - flexStp.csv
+ - regularMA.csv
+ - invertedMA.csv
+ - ranked_top1.csv
+ - ranked_top2.csv
+ - ranked_top3.csv
+ _ ranked_bottom1.csv
+ _ ranked_bottom2.csv
+ _ ranked_bottom3.csv
+ - timing.csv
