@@ -22,6 +22,12 @@ def set_global_vars():
   header = nav_data[0]  
   fund_names = header.split(',')[1:]
   num_rows = len(nav_data)
+
+def get_fund_nav_dict(nav_line):
+  nav_dict = {}
+  for fund, nav in zip(fund_names, nav_line):
+    nav_dict[fund] = float(nav)
+  return nav_dict
   
 def compute_returns():
 
@@ -34,10 +40,7 @@ def compute_returns():
     if i < 13 or i == (num_rows - 1): continue
     dt = datetime.strptime(r.split(',')[0], '%d-%m-%Y')
     nav_line = r.split(',')[1:]
-    
-    nav_dict = {}
-    for fund, nav in zip(fund_names, nav_line):
-      nav_dict[fund] = float(nav)
+    nav_dict = get_fund_nav_dict(nav_line)
     
     cf = (dt, -common.mnt_inv)
     for fund in fund_names:
@@ -63,31 +66,36 @@ def compute_returns():
     abs_return = (wealth / investment) - 1
     ann_return = common.xirr(cashflows_dict[fund])
     perf_dict[fund] = (investment, wealth, abs_return, ann_return)
-      
-def compute_risk():
 
-  last_nav_dict = defaultdict(float)
+def compute_sharpe():
+  
+  inv_dict = defaultdict(list)
   ret_dict = defaultdict(list)
-
+  units_dict = defaultdict(list)
+  
   for i,r in enumerate(nav_data):
     
     if i < 13 or i == (num_rows - 1): continue
     nav_line = r.split(',')[1:]
-    
-    nav_dict = {}
-    for fund, nav in zip(fund_names, nav_line):
-      nav_dict[fund] = float(nav)
+    nav_dict = get_fund_nav_dict(nav_line)
     
     for fund in fund_names:
       nav = nav_dict[fund]
-      last_nav = last_nav_dict[fund]
-      if last_nav != 0:
-        ret = (nav / last_nav) - 1.0
+      units = common.mnt_inv / nav
+      units_dict[fund].append(units)
+      inv_dict[fund].append(common.mnt_inv)
+      
+      if len(inv_dict[fund]) == 13:
+        inv = inv_dict[fund][0]
+        units = units_dict[fund][0]
+        wealth = nav * units
+        ret = (wealth / inv) - 1.0
         ret_dict[fund].append(ret)
-      last_nav_dict[fund] = nav
-  
+        del inv_dict[fund][0]
+        del units_dict[fund][0]
+        
   for fund in fund_names:
-    sharpe = common.get_mnt_sharpe(ret_dict[fund])
+    sharpe = common.get_sharpe(ret_dict[fund])
     risk_dict[fund] = sharpe
 
 def save():
@@ -114,6 +122,6 @@ def run():
 
   set_global_vars()
   compute_returns()
-  compute_risk()
+  compute_sharpe()
   save()
   

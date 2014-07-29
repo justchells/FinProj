@@ -40,11 +40,10 @@ def write_to_file(output_file, file_data):
   print 'done'
   print 'no. of lines written: %d' % len(file_data)
   
-def get_mnt_sharpe(ret_data):
-  rate = rf_rate / 12.0
+def get_sharpe(ret_data):
   mean = numpy.mean(ret_data)
   stdev = numpy.std(ret_data)
-  mnt_sharpe = (mean - rate) / stdev
+  mnt_sharpe = (mean - rf_rate) / stdev
   return mnt_sharpe
   
 def xirr(transactions):
