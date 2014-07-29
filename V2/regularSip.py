@@ -8,19 +8,26 @@ from datetime import datetime
 output_dir = 'output'
 output_file = 'regularSip.csv'
 
-inv_dict = defaultdict(float)
-units_dict = defaultdict(float)
-cashflows_dict = defaultdict(list)
-perf_dict = defaultdict()
+nav_data = []
+header = None
+fund_names = []
+num_rows = None
 
-ret_dict = defaultdict(list)
-last_nav_dict = defaultdict(float)
+perf_dict = defaultdict()
 risk_dict = defaultdict(float)
 
-def compute_returns(nav_data):
-  header = nav_data[0]
-  num_rows = len(nav_data)
+def set_global_vars():
+  global nav_data, header, fund_names, num_rows
+  nav_data = common.get_nav_data()
+  header = nav_data[0]  
   fund_names = header.split(',')[1:]
+  num_rows = len(nav_data)
+  
+def compute_returns():
+
+  inv_dict = defaultdict(float)
+  units_dict = defaultdict(float)
+  cashflows_dict = defaultdict(list)
   
   for i,r in enumerate(nav_data):
     
@@ -57,11 +64,11 @@ def compute_returns(nav_data):
     ann_return = common.xirr(cashflows_dict[fund])
     perf_dict[fund] = (investment, wealth, abs_return, ann_return)
       
-def compute_risk(nav_data):
-  header = nav_data[0]
-  num_rows = len(nav_data)
-  fund_names = header.split(',')[1:]
-  
+def compute_risk():
+
+  last_nav_dict = defaultdict(float)
+  ret_dict = defaultdict(list)
+
   for i,r in enumerate(nav_data):
     
     if i < 13 or i == (num_rows - 1): continue
@@ -82,19 +89,13 @@ def compute_risk(nav_data):
   for fund in fund_names:
     sharpe = common.get_mnt_sharpe(ret_dict[fund])
     risk_dict[fund] = sharpe
-    
-def run():
-  
-  nav_data = common.get_nav_data()
-  compute_returns(nav_data)
-  compute_risk(nav_data)
+
+def save():
 
   file_data = []
   header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
   file_data.append(header_line)
   
-  header = nav_data[0]
-  fund_names = header.split(',')[1:]
   for fund in fund_names:
     (investment, wealth, abs_return, ann_return) = perf_dict[fund]
     sharpe = risk_dict[fund]
@@ -108,4 +109,11 @@ def run():
   
   out_file = os.path.join(output_dir, output_file)
   common.write_to_file(out_file, file_data)
+    
+def run():
+
+  set_global_vars()
+  compute_returns()
+  compute_risk()
+  save()
   
