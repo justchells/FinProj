@@ -5,26 +5,26 @@ import common
 from collections import defaultdict
 from datetime import datetime
 
-output_dir = 'output'
-output_file = 'flexStp.csv'
+out_dir = 'output'
+out_file = 'flexStp.csv'
 
 num_rows = None
 nav_data = None
 fund_names = None
-default_inv = None
 
 perf_dict = defaultdict()
 risk_dict = defaultdict(float)
+units_save_dict = defaultdict(list)
 
 def set_global_vars():
 
-  global nav_data, fund_names, num_rows, default_inv
+  global nav_data, fund_names, num_rows
   nav_data = common.get_nav_data()
   fund_names = nav_data[0].split(',')[1:]
   num_rows = len(nav_data)
-  default_inv = common.mnt_inv
 
 def get_fund_wealth(units_dict, nav_dict):
+
   fund_wealth = defaultdict(float)
   for fund in units_dict:
     fund_wealth[fund] = units_dict[fund] * nav_dict[fund]
@@ -32,9 +32,12 @@ def get_fund_wealth(units_dict, nav_dict):
   
 def compute_returns():
   
+  global perf_dict, units_save_dict
   inv_dict = defaultdict(float)
   units_dict = defaultdict(float)
   cashflows_dict = defaultdict(list)
+  
+  default_inv = common.mnt_inv
   max_inv = default_inv * (num_rows - 14)
 
   for i,r in enumerate(nav_data):
@@ -57,6 +60,7 @@ def compute_returns():
       
       units = mnt_inv / nav
       units_dict[fund] += units
+      units_save_dict[fund].append(units)
       cf = (dt, -mnt_inv)
       cashflows_dict[fund].append(cf)
     
@@ -79,10 +83,46 @@ def compute_returns():
   pass
   
 def compute_risk():
+
+  for fund in fund_names:
+    
+    ret_data = []
+    for i, units in enumerate(units_save_dict[fund]):
+    
+      if (i + 25) >= num_rows: break
+      
+      nav_line = nav_data[i + 13].split(',')[1:]
+      nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
+      inv = units * nav_dict[fund]
+      if inv == 0: continue
+      
+      curr_nav_line = nav_data[i + 25].split(',')[1:]
+      curr_nav_dict = common.get_fund_nav_dict(fund_names, curr_nav_line)
+      wealth = units * curr_nav_dict[fund]
+      
+      ret = (wealth / inv) - 1.0
+      ret_data.append(ret)
+    
+    sharpe = common.get_sharpe(ret_data, 'annual')
+    risk_dict[fund] = sharpe
   pass
 
 def save():
-  pass
+
+  file_data = []
+  header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
+  file_data.append(header_line)
+  
+  for fund in fund_names:
+    (investment, wealth, abs_return, ann_return) = perf_dict[fund]
+    sharpe = risk_dict[fund]
+
+    line_data = fund + ',' + str(investment) + ',' + str(wealth) + ',' \
+      + str(abs_return) + ',' + str(ann_return) + ',' + str(sharpe)
+    file_data.append(line_data)
+    
+  out_file_path = os.path.join(out_dir, out_file)
+  common.write_to_file(out_file_path, file_data)
   
 def run():
   set_global_vars()
