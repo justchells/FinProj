@@ -25,11 +25,11 @@ def main():
   header('Flex STP')
   flexStp.run()
   
-  header('Regular MA')
-  ma.run('regular', 3)
-  # ma.run('regular', 6)
-  # ma.run('regular', 9)
-  # ma.run('regular', 12)
+  header('Normal MA')
+  ma.run('normal', 3)
+  # ma.run('normal', 6)
+  # ma.run('normal', 9)
+  # ma.run('normal', 12)
   
   header('Inverted MA')
   # ma.run('inverted', 3)

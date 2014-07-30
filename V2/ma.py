@@ -22,7 +22,7 @@ increment = None
 ma_dict = defaultdict(list)
 perf_dict = defaultdict()
 
-inc_factor = 0.25
+inc_factor = 0.10
 max_factor = 2.0
 
 def set_global_vars(t, p):
@@ -75,18 +75,19 @@ def get_mnt_inv(nav, ma, prev_inv):
   
 def compute_returns():
 
-  global perf_dict
-  inv_dict = defaultdict(float)
-  last_inv_dict = defaultdict(float)
-  units_dict = defaultdict(float)
-  cashflows_dict = defaultdict(list)
-
   global min_inv, max_inv, increment
   default_inv = common.mnt_inv
   min_inv = 0
   max_inv = default_inv * max_factor
   increment = default_inv * inc_factor
   max_total_inv = default_inv * (num_rows - 14)
+  
+
+  global perf_dict
+  inv_dict = defaultdict(float)
+  last_inv_dict = defaultdict(lambda: default_inv)
+  units_dict = defaultdict(float)
+  cashflows_dict = defaultdict(list)
   
   for i,r in enumerate(nav_data):
     
