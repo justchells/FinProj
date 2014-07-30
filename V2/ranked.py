@@ -13,6 +13,7 @@ type = None
 rank = None
 index = None
 mnt_inv = None
+num_rows = None
 nav_data = None
 fund_names = None
 
@@ -24,7 +25,7 @@ risk_data = None
 
 def set_global_vars(t, r):
 
-  global type, rank, index, mnt_inv, nav_data, fund_names, output_file
+  global type, rank, index, mnt_inv, num_rows, nav_data, fund_names, output_file
 
   type = t
   rank = r
@@ -36,6 +37,7 @@ def set_global_vars(t, r):
 
   mnt_inv = common.mnt_inv
   nav_data = common.get_nav_data()
+  num_rows = len(nav_data)
   fund_names = nav_data[0].split(',')[1:]
   
 def sort_fn(fund):  
@@ -86,7 +88,6 @@ def compute_returns():
   cashflows = []
   units_dict = defaultdict(float)
   
-  num_rows = len(nav_data)
   for i,r in enumerate(nav_data):
   
     if i < 13 or i == (num_rows - 1): continue
@@ -130,7 +131,6 @@ def compute_risk():
   global risk_data
   ret_data = []
   
-  num_rows = len(nav_data)
   for i,r in enumerate(sharpe_rank_data):
 
     if i == 0 or (i + 24) >= num_rows: continue
