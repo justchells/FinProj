@@ -8,27 +8,22 @@ from datetime import datetime
 output_dir = 'output'
 output_file = 'regularSip.csv'
 
-nav_data = []
-header = None
-fund_names = []
+mnt_inv = None
 num_rows = None
+nav_data = None
+fund_names = None
 
 perf_dict = defaultdict()
 risk_dict = defaultdict(float)
 
 def set_global_vars():
-  global nav_data, header, fund_names, num_rows
-  nav_data = common.get_nav_data()
-  header = nav_data[0]  
-  fund_names = header.split(',')[1:]
-  num_rows = len(nav_data)
 
-def get_fund_nav_dict(nav_line):
-  nav_dict = {}
-  for fund, nav in zip(fund_names, nav_line):
-    nav_dict[fund] = float(nav)
-  return nav_dict
-  
+  global nav_data, fund_names, num_rows, mnt_inv
+  nav_data = common.get_nav_data()
+  fund_names = nav_data[0].split(',')[1:]
+  num_rows = len(nav_data)
+  mnt_inv = common.mnt_inv
+
 def compute_returns():
 
   inv_dict = defaultdict(float)
@@ -40,13 +35,13 @@ def compute_returns():
     if i < 13 or i == (num_rows - 1): continue
     dt = datetime.strptime(r.split(',')[0], '%d-%m-%Y')
     nav_line = r.split(',')[1:]
-    nav_dict = get_fund_nav_dict(nav_line)
+    nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
     
-    cf = (dt, -common.mnt_inv)
+    cf = (dt, -mnt_inv)
     for fund in fund_names:
       nav = nav_dict[fund]
-      units = common.mnt_inv / nav
-      inv_dict[fund] += common.mnt_inv
+      units = mnt_inv / nav
+      inv_dict[fund] += mnt_inv
       units_dict[fund] += units
       cashflows_dict[fund].append(cf)
 
@@ -67,7 +62,7 @@ def compute_returns():
     ann_return = common.xirr(cashflows_dict[fund])
     perf_dict[fund] = (investment, wealth, abs_return, ann_return)
 
-def compute_sharpe():
+def compute_risk():
   
   inv_dict = defaultdict(list)
   ret_dict = defaultdict(list)
@@ -77,13 +72,13 @@ def compute_sharpe():
     
     if i < 13 or i == (num_rows - 1): continue
     nav_line = r.split(',')[1:]
-    nav_dict = get_fund_nav_dict(nav_line)
+    nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
     
     for fund in fund_names:
       nav = nav_dict[fund]
-      units = common.mnt_inv / nav
+      units = mnt_inv / nav
       units_dict[fund].append(units)
-      inv_dict[fund].append(common.mnt_inv)
+      inv_dict[fund].append(mnt_inv)
       
       if len(inv_dict[fund]) == 13:
         inv = inv_dict[fund][0]
@@ -95,7 +90,7 @@ def compute_sharpe():
         del units_dict[fund][0]
         
   for fund in fund_names:
-    sharpe = common.get_sharpe(ret_dict[fund])
+    sharpe = common.get_sharpe(ret_dict[fund], 'annual')
     risk_dict[fund] = sharpe
 
 def save():
@@ -122,6 +117,6 @@ def run():
 
   set_global_vars()
   compute_returns()
-  compute_sharpe()
+  compute_risk()
   save()
   

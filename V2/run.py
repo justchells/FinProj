@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import common
 import regularSip
 import flexStp
 import ma
@@ -14,6 +15,9 @@ def header(name):
   print ''
   
 def main():
+
+  header('Loading Data')
+  common.set_nav_data()
 
   header('Regular SIP')
   regularSip.run()
@@ -35,13 +39,13 @@ def main():
   
   header('Top Ranked')
   ranked.run('top', 1)
-  ranked.run('top', 2)
-  ranked.run('top', 3)
+  # ranked.run('top', 2)
+  # ranked.run('top', 3)
   
   header('Bottom Ranked')
-  ranked.run('bottom', 1)
-  ranked.run('bottom', 2)
-  ranked.run('bottom', 3)
+  # ranked.run('bottom', 1)
+  # ranked.run('bottom', 2)
+  # ranked.run('bottom', 3)
   
   header('Timed')
   timed.run()

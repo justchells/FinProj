@@ -2,16 +2,75 @@
 
 import os
 import numpy
+from collections import defaultdict
 
-rf_rate = 9.0 / 100.0
-mnt_inv = 1000
 data_dir = 'data'
 nav_file = 'navData.csv'
+sharpe_data_file = 'sharpeData.csv'
+
+mnt_inv = 1000
+default_rf_rate = 9.0 / 100.0
+
+nav_data = None
+sharpe_data = None
 
 def get_nav_data():
-  nav_file_path = os.path.join(data_dir, nav_file)
-  return read_from_file(nav_file_path)
+  
+  if nav_data: return nav_data
+  set_nav_data()
+  return nav_data
 
+def set_nav_data():
+  
+  global nav_data
+  nav_file_path = os.path.join(data_dir, nav_file)
+  nav_data = read_from_file(nav_file_path)
+
+def get_sharpe_data():
+  
+  if sharpe_data: return sharpe_data
+  set_sharpe_data()
+  return sharpe_data
+
+def set_sharpe_data():
+  
+  global sharpe_data
+  sharpe_data = []
+  header = nav_data[0]
+  sharpe_data.append(header)
+  num_cols = len(header.split(','))
+  nav_dict = defaultdict(list)
+  
+  for i, r in enumerate(nav_data):
+  
+    if i == 0: continue
+    
+    nav_line = r.split(',')
+    dt = nav_line[0]
+    for j in xrange(1, num_cols):
+      nav_dict[j].append(float(nav_line[j])) 
+
+    if len(nav_dict[1]) == 13:
+      row = [dt]
+      for j in xrange(1, num_cols):
+        n = nav_dict[j]
+        ret = [ ((n[k] / n[k-1]) - 1) for k in xrange(1, 13) ]
+        sharpe = get_sharpe(ret, 'monthly')
+        row.append(str(sharpe))
+        n.pop(0) 
+    
+      line_data = ','.join(row)
+      sharpe_data.append(line_data)
+ 
+  sharpe_data_file_path = os.path.join(data_dir, sharpe_data_file)
+  write_to_file(sharpe_data_file_path, sharpe_data)
+  
+def get_fund_nav_dict(fund_names, nav_line):
+  fund_nav_dict = {}
+  for fund, nav in zip(fund_names, nav_line):
+    fund_nav_dict[fund] = float(nav)
+  return fund_nav_dict
+  
 def read_from_file(input_file):
   """
   Returns the file contents in a list.
@@ -39,8 +98,13 @@ def write_to_file(output_file, file_data):
       f.write(line)
   print 'done'
   print 'no. of lines written: %d' % len(file_data)
+
+def get_rf_rate(freq):
+  if freq == 'monthly': return default_rf_rate / 12.0
+  return default_rf_rate
   
-def get_sharpe(ret_data):
+def get_sharpe(ret_data, freq):
+  rf_rate = get_rf_rate(freq)
   mean = numpy.mean(ret_data)
   stdev = numpy.std(ret_data)
   mnt_sharpe = (mean - rf_rate) / stdev
