@@ -38,14 +38,15 @@ def main():
   ma.run('inverted', 12)
   
   header('Top Ranked')
+  ranked.create_out_file()
   ranked.run('top', 1)
-  # ranked.run('top', 2)
-  # ranked.run('top', 3)
+  ranked.run('top', 2)
+  ranked.run('top', 3)
   
   header('Bottom Ranked')
-  # ranked.run('bottom', 1)
-  # ranked.run('bottom', 2)
-  # ranked.run('bottom', 3)
+  ranked.run('bottom', 1)
+  ranked.run('bottom', 2)
+  ranked.run('bottom', 3)
   
   header('Timed')
   timed.run()

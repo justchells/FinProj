@@ -107,9 +107,6 @@ def save():
       + str(abs_return) + ',' + str(ann_return) + ',' + str(sharpe)
     file_data.append(line_data)
     
-    # if fund == 'ICICIPru_Dynamic_Plan':
-      # print '%d,%d,%.2f,%.2f,%.2f' % (investment, wealth, abs_return * 100.0, ann_return * 100.0, sharpe)
-  
   out_file = os.path.join(output_dir, output_file)
   common.write_to_file(out_file, file_data)
     
@@ -119,4 +116,3 @@ def run():
   compute_returns()
   compute_risk()
   save()
-  

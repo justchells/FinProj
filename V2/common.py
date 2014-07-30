@@ -41,9 +41,10 @@ def set_sharpe_data():
   num_cols = len(header.split(','))
   nav_dict = defaultdict(list)
   
+  num_rows = len(nav_data)
   for i, r in enumerate(nav_data):
   
-    if i == 0: continue
+    if i == 0 or i == (num_rows - 1): continue
     
     nav_line = r.split(',')
     dt = nav_line[0]
@@ -86,13 +87,17 @@ def read_from_file(input_file):
   print 'no. of lines read: %d' % len(file_data)
   return file_data
 
-def write_to_file(output_file, file_data):
+def append_to_file(out_file, file_data):
+  write_to_file(out_file, file_data, 'a')
+  
+def write_to_file(out_file, file_data, write_mode = 'w'):
   """
   Write the file data to the output file.
   """
-  msg = 'Writing to %s ...' % (output_file)
+  mode = 'Writing' if write_mode == 'w' else 'Appending'
+  msg = '%s to %s ...' % (mode, out_file)
   print msg,
-  with open(output_file, 'w') as f:
+  with open(out_file, write_mode) as f:
     for d in file_data:
       line = str(d) + '\n'
       f.write(line)
