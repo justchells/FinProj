@@ -27,15 +27,15 @@ def main():
   
   header('Regular MA')
   ma.run('regular', 3)
-  ma.run('regular', 6)
-  ma.run('regular', 9)
-  ma.run('regular', 12)
+  # ma.run('regular', 6)
+  # ma.run('regular', 9)
+  # ma.run('regular', 12)
   
   header('Inverted MA')
-  ma.run('inverted', 3)
-  ma.run('inverted', 6)
-  ma.run('inverted', 9)
-  ma.run('inverted', 12)
+  # ma.run('inverted', 3)
+  # ma.run('inverted', 6)
+  # ma.run('inverted', 9)
+  # ma.run('inverted', 12)
   
   header('Top Ranked')
   ranked.create_out_file()
