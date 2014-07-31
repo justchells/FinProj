@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import common
 import regularSip
 import flexStp
@@ -27,15 +28,15 @@ def main():
   
   header('Normal MA')
   ma.run('normal', 3)
-  # ma.run('normal', 6)
-  # ma.run('normal', 9)
-  # ma.run('normal', 12)
+  ma.run('normal', 6)
+  ma.run('normal', 9)
+  ma.run('normal', 12)
   
   header('Inverted MA')
-  # ma.run('inverted', 3)
-  # ma.run('inverted', 6)
-  # ma.run('inverted', 9)
-  # ma.run('inverted', 12)
+  ma.run('inverted', 3)
+  ma.run('inverted', 6)
+  ma.run('inverted', 9)
+  ma.run('inverted', 12)
   
   header('Top Ranked')
   ranked.create_out_file()

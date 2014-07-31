@@ -67,6 +67,7 @@ def set_sharpe_data():
   write_to_file(sharpe_data_file_path, sharpe_data)
   
 def get_fund_nav_dict(fund_names, nav_line):
+
   fund_nav_dict = {}
   for fund, nav in zip(fund_names, nav_line):
     fund_nav_dict[fund] = float(nav)
@@ -77,6 +78,7 @@ def read_from_file(input_file):
   Returns the file contents in a list.
   The EOL character \n is stripped from each line.
   """
+
   msg = 'reading from %s ...' % (input_file)
   print msg,
   file_data = []
