@@ -14,6 +14,14 @@ default_rf_rate = 9.0 / 100.0
 nav_data = None
 sharpe_data = None
 
+def header(name):
+
+  print '\n'
+  print '-' * 50
+  print name
+  print '-' * 50
+  print ''
+
 def get_nav_data():
   
   if nav_data: return nav_data
