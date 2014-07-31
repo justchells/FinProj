@@ -5,15 +5,11 @@ import common
 from collections import defaultdict
 from datetime import datetime
 
-out_dir = 'output'
-out_file = 'flexStp.csv'
-
 num_rows = None
 nav_data = None
 fund_names = None
 
-perf_dict = defaultdict()
-risk_dict = defaultdict(float)
+stats_dict = defaultdict(list)
 units_save_dict = defaultdict(list)
 
 def set_global_vars():
@@ -32,7 +28,7 @@ def get_fund_wealth(units_dict, nav_dict):
   
 def compute_returns():
   
-  global perf_dict, units_save_dict
+  global stats_dict, units_save_dict
   inv_dict = defaultdict(float)
   units_dict = defaultdict(float)
   cashflows_dict = defaultdict(list)
@@ -50,6 +46,7 @@ def compute_returns():
     
     index = i - 12
     for fund in fund_names:
+    
       nav = nav_dict[fund]
       fund_value = wealth[fund]
       fund_inv = inv_dict[fund]
@@ -67,27 +64,33 @@ def compute_returns():
   last_line = nav_data[num_rows - 1].split(',')
   curr_dt = datetime.strptime(last_line[0], '%d-%m-%Y')
   curr_nav_line = last_line[1:]
-  
-  curr_nav_dict = {}
-  for fund, nav in zip(fund_names, curr_nav_line):
-    curr_nav_dict[fund] = float(nav)
+  curr_nav_dict = common.get_fund_nav_dict(fund_names, curr_nav_line)
 
   for fund in fund_names:
+    
     investment = inv_dict[fund]
     wealth = units_dict[fund] * curr_nav_dict[fund]
+    abs_return = (wealth / investment) - 1
+    
     cf = (curr_dt, wealth)
     cashflows_dict[fund].append(cf)
-    abs_return = (wealth / investment) - 1
     ann_return = common.xirr(cashflows_dict[fund])
-    perf_dict[fund] = (investment, wealth, abs_return, ann_return)
-  pass
+    
+    stats = [investment, wealth, abs_return, ann_return]
+    stats_dict[fund].extend(stats)
   
 def compute_risk():
 
+  global stats_dict
   for fund in fund_names:
     
     ret_data = []
     for i, units in enumerate(units_save_dict[fund]):
+    
+      # why (i + 13) and (i + 25)?
+      # the header row and first 12 rows are ignored in nav_data
+      # hence, the first index where investment starts is (i + 13)
+      # to look nav of this investment one year later, we use (i + 25)
     
       if (i + 25) >= num_rows: break
       
@@ -104,8 +107,7 @@ def compute_risk():
       ret_data.append(ret)
     
     sharpe = common.get_sharpe(ret_data, 'annual')
-    risk_dict[fund] = sharpe
-  pass
+    stats_dict[fund].append(sharpe)
 
 def save():
 
@@ -114,14 +116,13 @@ def save():
   file_data.append(header_line)
   
   for fund in fund_names:
-    (investment, wealth, abs_return, ann_return) = perf_dict[fund]
-    sharpe = risk_dict[fund]
-
+  
+    (investment, wealth, abs_return, ann_return, sharpe) = stats_dict[fund]
     line_data = fund + ',' + str(investment) + ',' + str(wealth) + ',' \
       + str(abs_return) + ',' + str(ann_return) + ',' + str(sharpe)
     file_data.append(line_data)
     
-  out_file_path = os.path.join(out_dir, out_file)
+  out_file_path = os.path.join('output', 'flexStp.csv')
   common.write_to_file(out_file_path, file_data)
   
 def run():
