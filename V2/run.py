@@ -15,9 +15,8 @@ def main():
   # ma.optimize('risk', 'inc_factor')
   # ma.optimize('returns', 'max_factor')
   # ma.optimize('risk', 'max_factor')
-
-  ma.stats_inc_factor()
-  sys.exit(0)
+  # ma.stats_inc_factor()
+  # sys.exit(0)
 
   header('Loading Data')
   common.set_nav_data()

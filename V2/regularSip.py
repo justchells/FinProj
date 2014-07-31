@@ -99,7 +99,7 @@ def save():
   header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
   file_data.append(header_line)
   
-  for fund in fund_names:
+  for fund in sorted(fund_names):
     (investment, wealth, abs_return, ann_return) = perf_dict[fund]
     sharpe = risk_dict[fund]
 

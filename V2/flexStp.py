@@ -115,7 +115,7 @@ def save():
   header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
   file_data.append(header_line)
   
-  for fund in fund_names:
+  for fund in sorted(fund_names):
   
     (investment, wealth, abs_return, ann_return, sharpe) = stats_dict[fund]
     line_data = fund + ',' + str(investment) + ',' + str(wealth) + ',' \
