@@ -65,12 +65,18 @@ def set_ma_data():
       avg = numpy.mean(nav_list)
       ma_dict[fund].append(avg)
 
-def get_mnt_inv(nav, ma, prev_inv):
+def get_mnt_inv(index, nav, ma, prev_inv):
   
   default_inv = common.mnt_inv
   min_inv = 0
-  max_inv = default_inv * max_factor
-  increment = default_inv * inc_factor
+  
+  base_inv_factor = int(index / 12)
+  base_inv = default_inv * (1 + base_inv_factor)
+  increment = base_inv * inc_factor
+  max_inv = base_inv * max_factor
+  
+  # max_inv = default_inv * max_factor
+  # increment = default_inv * inc_factor
   
   mnt_inv = 0
   if type == 'normal':
@@ -103,6 +109,7 @@ def compute_returns():
     dt = datetime.strptime(r.split(',')[0], '%d-%m-%Y')
     nav_line = r.split(',')[1:]
     nav_dict = common.get_fund_nav_dict(fund_names, nav_line)
+    index = i - 13
     
     for fund in fund_names:
     
@@ -112,7 +119,7 @@ def compute_returns():
       prev_inv = last_inv_dict[fund]
 
       allowed_inv = max_total_inv - fund_inv
-      mnt_inv = get_mnt_inv(nav, ma, prev_inv)
+      mnt_inv = get_mnt_inv(index, nav, ma, prev_inv)
       mnt_inv = min(mnt_inv, allowed_inv)
       
       units = mnt_inv / nav
