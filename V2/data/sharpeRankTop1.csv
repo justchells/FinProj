@@ -1,73 +1,145 @@
 Date,Fund
-01-01-2008,DWS_Inv_Opp_Fund
-01-02-2008,DWS_Inv_Opp_Fund
-03-03-2008,Reliance_Regular_Savings_Equity
-01-04-2008,DWS_Inv_Opp_Fund
-02-05-2008,DWS_Inv_Opp_Fund
-02-06-2008,DWS_Inv_Opp_Fund
-01-07-2008,DWS_Inv_Opp_Fund
-01-08-2008,Reliance_Regular_Savings_Equity
-01-09-2008,Reliance_Regular_Savings_Equity
-01-10-2008,Reliance_Regular_Savings_Equity
-03-11-2008,Birla_Dividend_Yield_Plus
-01-12-2008,Birla_Dividend_Yield_Plus
-01-01-2009,ICICIPru_Dynamic_Plan
-02-02-2009,Birla_Dividend_Yield_Plus
-02-03-2009,ICICIPru_Dynamic_Plan
-01-04-2009,ICICIPru_Dynamic_Plan
-04-05-2009,HDFC_Equity
-01-06-2009,Birla_Dividend_Yield_Plus
-01-07-2009,Birla_Dividend_Yield_Plus
-03-08-2009,Birla_Dividend_Yield_Plus
-01-09-2009,Birla_Dividend_Yield_Plus
-01-10-2009,Birla_Dividend_Yield_Plus
-03-11-2009,Birla_Dividend_Yield_Plus
-01-12-2009,Tata_Dividend_Yield
-04-01-2010,Tata_Dividend_Yield
-01-02-2010,Tata_Dividend_Yield
-02-03-2010,Tata_Dividend_Yield
-01-04-2010,Tata_Dividend_Yield
-03-05-2010,Tata_Dividend_Yield
-01-06-2010,Tata_Dividend_Yield
-01-07-2010,Tata_Dividend_Yield
-02-08-2010,Birla_Dividend_Yield_Plus
-01-09-2010,Tata_Dividend_Yield
-01-10-2010,Tata_Dividend_Yield
-01-11-2010,Tata_Dividend_Yield
-01-12-2010,Birla_Dividend_Yield_Plus
-03-01-2011,Tata_Dividend_Yield
-01-02-2011,HDFC_Equity
-01-03-2011,HDFC_Equity
-01-04-2011,HDFC_Equity
-02-05-2011,HDFC_Equity
-01-06-2011,Birla_India_GenNext_Fund
-01-07-2011,Birla_India_GenNext_Fund
-01-08-2011,Birla_India_GenNext_Fund
-02-09-2011,Birla_India_GenNext_Fund
-03-10-2011,Birla_India_GenNext_Fund
-01-11-2011,Birla_India_GenNext_Fund
-01-12-2011,Birla_India_GenNext_Fund
-02-01-2012,Birla_India_GenNext_Fund
-01-02-2012,Birla_India_GenNext_Fund
-01-03-2012,Birla_India_GenNext_Fund
-02-04-2012,Birla_India_GenNext_Fund
-02-05-2012,Birla_India_GenNext_Fund
-01-06-2012,Reliance_Equity_Opp_Fund
-02-07-2012,Reliance_Equity_Opp_Fund
-01-08-2012,Reliance_Equity_Opp_Fund
-03-09-2012,Reliance_Equity_Opp_Fund
-01-10-2012,Birla_India_GenNext_Fund
-01-11-2012,Reliance_Equity_Opp_Fund
-03-12-2012,Birla_India_GenNext_Fund
-01-01-2013,Birla_India_GenNext_Fund
-01-02-2013,Birla_India_GenNext_Fund
-01-03-2013,Birla_India_GenNext_Fund
-01-04-2013,Birla_India_GenNext_Fund
-02-05-2013,Birla_India_GenNext_Fund
-03-06-2013,Birla_India_GenNext_Fund
-01-07-2013,ICICIPru_Export_And_Services
-01-08-2013,ICICIPru_Export_And_Services
-02-09-2013,ICICIPru_Export_And_Services
-01-10-2013,ICICIPru_Export_And_Services
-01-11-2013,ICICIPru_Export_And_Services
-02-12-2013,ICICIPru_Export_And_Services
+01-01-2002,Franklin India Opportunities Fund - (G)
+01-02-2002,HDFC Top 200 Fund (G)
+01-03-2002,HDFC Large Cap Fund (G)
+01-04-2002,ICICI Pru Top 200 Fund - (G)
+01-05-2002,ICICI Pru Top 200 Fund - (G)
+01-06-2002,HDFC Top 200 Fund (G)
+01-07-2002,ICICI Pru Top 200 Fund - (G)
+01-08-2002,HDFC Top 200 Fund (G)
+01-09-2002,HDFC Top 200 Fund (G)
+01-10-2002,UTI-Top 100 Fund (G)
+01-11-2002,HDFC Top 200 Fund (G)
+01-12-2002,ICICI Pru Top 200 Fund - (G)
+01-01-2003,HDFC Top 200 Fund (G)
+01-02-2003,HDFC Top 200 Fund (G)
+01-03-2003,ICICI Pru Top 200 Fund - (G)
+01-04-2003,ICICI Pru Top 200 Fund - (G)
+01-05-2003,ICICI Pru Top 200 Fund - (G)
+01-06-2003,HDFC Top 200 Fund (G)
+01-07-2003,HDFC Top 200 Fund (G)
+01-08-2003,ICICI Pru Top 200 Fund - (G)
+01-09-2003,ICICI Pru Top 200 Fund - (G)
+01-10-2003,ICICI Pru Top 200 Fund - (G)
+01-11-2003,ICICI Pru Top 200 Fund - (G)
+01-12-2003,ICICI Pru Top 200 Fund - (G)
+01-01-2004,ICICI Pru Top 200 Fund - (G)
+01-02-2004,Franklin India Bluechip Fund - (G)
+01-03-2004,Franklin India Bluechip Fund - (G)
+01-04-2004,Franklin India Bluechip Fund - (G)
+01-05-2004,Franklin India Bluechip Fund - (G)
+01-06-2004,Tata Pure Equity Fund - (G)
+01-07-2004,Franklin India Opportunities Fund - (G)
+01-08-2004,Franklin India Bluechip Fund - (G)
+01-09-2004,Tata Pure Equity Fund - (G)
+01-10-2004,Tata Pure Equity Fund - (G)
+01-11-2004,Tata Pure Equity Fund - (G)
+01-12-2004,Tata Pure Equity Fund - (G)
+01-01-2005,Sundaram Growth Fund - (G)
+01-02-2005,Tata Pure Equity Fund - (G)
+01-03-2005,Franklin India Opportunities Fund - (G)
+01-04-2005,Franklin India Opportunities Fund - (G)
+01-05-2005,HDFC Large Cap Fund (G)
+01-06-2005,Tata Pure Equity Fund - (G)
+01-07-2005,Tata Pure Equity Fund - (G)
+01-08-2005,Tata Pure Equity Fund - (G)
+01-09-2005,Tata Pure Equity Fund - (G)
+01-10-2005,Tata Pure Equity Fund - (G)
+01-11-2005,HDFC Top 200 Fund (G)
+01-12-2005,HDFC Top 200 Fund (G)
+01-01-2006,HDFC Top 200 Fund (G)
+01-02-2006,HDFC Top 200 Fund (G)
+01-03-2006,HDFC Top 200 Fund (G)
+01-04-2006,HDFC Top 200 Fund (G)
+01-05-2006,ICICI Pru Top 100 Fund - (G)
+01-06-2006,ICICI Pru Top 200 Fund - (G)
+01-07-2006,HDFC Top 200 Fund (G)
+01-08-2006,HDFC Top 200 Fund (G)
+01-09-2006,HDFC Top 200 Fund (G)
+01-10-2006,HDFC Top 200 Fund (G)
+01-11-2006,ICICI Pru Top 200 Fund - (G)
+01-12-2006,ICICI Pru Top 200 Fund - (G)
+01-01-2007,ICICI Pru Top 200 Fund - (G)
+01-02-2007,Franklin India Opportunities Fund - (G)
+01-03-2007,ICICI Pru Top 200 Fund - (G)
+01-04-2007,Franklin India Opportunities Fund - (G)
+01-05-2007,HDFC Top 200 Fund (G)
+01-06-2007,Franklin India Bluechip Fund - (G)
+01-07-2007,ICICI Pru Top 200 Fund - (G)
+01-08-2007,Tata Pure Equity Fund - (G)
+01-09-2007,Tata Pure Equity Fund - (G)
+01-10-2007,Tata Pure Equity Fund - (G)
+01-11-2007,Tata Pure Equity Fund - (G)
+01-12-2007,Tata Pure Equity Fund - (G)
+01-01-2008,Tata Pure Equity Fund - (G)
+01-02-2008,HDFC Top 200 Fund (G)
+01-03-2008,HDFC Top 200 Fund (G)
+01-04-2008,HDFC Top 200 Fund (G)
+01-05-2008,HDFC Top 200 Fund (G)
+01-06-2008,Sundaram Growth Fund - (G)
+01-07-2008,Sundaram Growth Fund - (G)
+01-08-2008,Sundaram Growth Fund - (G)
+01-09-2008,Sundaram Growth Fund - (G)
+01-10-2008,HDFC Top 200 Fund (G)
+01-11-2008,HDFC Top 200 Fund (G)
+01-12-2008,HDFC Top 200 Fund (G)
+01-01-2009,HDFC Top 200 Fund (G)
+01-02-2009,LIC NOMURA MF Equity Fund - (G)
+01-03-2009,LIC NOMURA MF Equity Fund - (G)
+01-04-2009,HDFC Top 200 Fund (G)
+01-05-2009,HDFC Top 200 Fund (G)
+01-06-2009,HDFC Top 200 Fund (G)
+01-07-2009,HDFC Top 200 Fund (G)
+01-08-2009,HDFC Top 200 Fund (G)
+01-09-2009,HDFC Top 200 Fund (G)
+01-10-2009,HDFC Top 200 Fund (G)
+01-11-2009,UTI-Equity Fund (G)
+01-12-2009,UTI-Equity Fund (G)
+01-01-2010,UTI-Equity Fund (G)
+01-02-2010,UTI-Equity Fund (G)
+01-03-2010,Franklin India Bluechip Fund - (G)
+01-04-2010,Franklin India Bluechip Fund - (G)
+01-05-2010,UTI-Equity Fund (G)
+01-06-2010,HDFC Top 200 Fund (G)
+01-07-2010,UTI-Equity Fund (G)
+01-08-2010,Tata Pure Equity Fund - (G)
+01-09-2010,HDFC Top 200 Fund (G)
+01-10-2010,Tata Pure Equity Fund - (G)
+01-11-2010,HDFC Top 200 Fund (G)
+01-12-2010,HDFC Top 200 Fund (G)
+01-01-2011,HDFC Top 200 Fund (G)
+01-02-2011,HDFC Top 200 Fund (G)
+01-03-2011,HDFC Top 200 Fund (G)
+01-04-2011,HDFC Top 200 Fund (G)
+01-05-2011,HDFC Top 200 Fund (G)
+01-06-2011,Franklin India Bluechip Fund - (G)
+01-07-2011,Franklin India Bluechip Fund - (G)
+01-08-2011,UTI-Equity Fund (G)
+01-09-2011,UTI-Equity Fund (G)
+01-10-2011,UTI-Equity Fund (G)
+01-11-2011,ICICI Pru Top 100 Fund - (G)
+01-12-2011,ICICI Pru Top 100 Fund - (G)
+01-01-2012,ICICI Pru Top 100 Fund - (G)
+01-02-2012,ICICI Pru Top 100 Fund - (G)
+01-03-2012,ICICI Pru Top 100 Fund - (G)
+01-04-2012,ICICI Pru Top 100 Fund - (G)
+01-05-2012,ICICI Pru Top 100 Fund - (G)
+01-06-2012,ICICI Pru Top 100 Fund - (G)
+01-07-2012,ICICI Pru Top 100 Fund - (G)
+01-08-2012,ICICI Pru Top 100 Fund - (G)
+01-09-2012,ICICI Pru Top 100 Fund - (G)
+01-10-2012,ICICI Pru Top 100 Fund - (G)
+01-11-2012,ICICI Pru Top 100 Fund - (G)
+01-12-2012,Tata Pure Equity Fund - (G)
+01-01-2013,HDFC Large Cap Fund (G)
+01-02-2013,HDFC Large Cap Fund (G)
+01-03-2013,HDFC Large Cap Fund (G)
+01-04-2013,HDFC Large Cap Fund (G)
+01-05-2013,HDFC Large Cap Fund (G)
+01-06-2013,HDFC Large Cap Fund (G)
+01-07-2013,HDFC Large Cap Fund (G)
+01-08-2013,HDFC Large Cap Fund (G)
+01-09-2013,ICICI Pru Top 100 Fund - (G)
+01-10-2013,ICICI Pru Top 100 Fund - (G)
+01-11-2013,ICICI Pru Top 100 Fund - (G)
+01-12-2013,ICICI Pru Top 100 Fund - (G)
