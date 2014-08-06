@@ -5,6 +5,7 @@ import common
 from common import header
 import regularSip
 import flexStp
+import equalWt
 import ma
 import ranked
 import timed
@@ -26,6 +27,9 @@ def main():
   
   header('Flex STP')
   flexStp.run()
+  
+  header('Equal Weighted')
+  equalWt.run()
   
   header('Normal MA')
   ma.run('normal', 3)

@@ -134,6 +134,7 @@ def save():
   common.write_to_file(out_file_path, file_data)
   
 def run():
+
   set_global_vars()
   compute_returns()
   compute_risk()
