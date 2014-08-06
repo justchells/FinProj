@@ -110,15 +110,11 @@ def compute_returns():
   last_line = nav_data[num_rows - 1].split(',')
   curr_dt = datetime.strptime(last_line[0], '%d-%m-%Y')
   curr_nav_line = last_line[1:]
-  
-  curr_nav_dict = {}
-  for fund, nav in zip(fund_names, curr_nav_line):
-    curr_nav_dict[fund] = float(nav)
+  curr_nav_dict = common.get_fund_nav_dict(fund_names, curr_nav_line)
   
   wealth = 0
   for fund in units_dict:
-    nav = curr_nav_dict[fund]
-    wealth += nav * units_dict[fund]
+    wealth += units_dict[fund] * curr_nav_dict[fund]
   
   cf = (curr_dt, wealth)
   cashflows.append(cf)
