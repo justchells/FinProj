@@ -9,6 +9,7 @@ import equalWt
 import ma
 import ranked
 import timed
+import summary
   
 def main():
 
@@ -28,8 +29,8 @@ def main():
   # header('Flex STP')
   # flexStp.run()
   
-  header('Equal Weighted')
-  equalWt.run()
+  # header('Equal Weighted')
+  # equalWt.run()
   
   # header('Normal MA')
   # ma.run('normal', 3)
@@ -50,14 +51,17 @@ def main():
   # ranked.run('top', 3)
   
   # header('Bottom Ranked')
-  # ranked.run('bottom', 1)
-  # ranked.run('bottom', 2)
   # ranked.run('bottom', 3)
+  # ranked.run('bottom', 2)
+  # ranked.run('bottom', 1)
   
   # header('Timed')
   # timed.run()
   
-  # print '\n'
+  header ('Summary')
+  summary.run()
+  
+  print '\n'
   
 if __name__ == '__main__':
   main()

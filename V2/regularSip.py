@@ -96,14 +96,14 @@ def compute_risk():
 def save():
 
   file_data = []
-  header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
+  header_line = 'Fund,Investment,InvPeriod,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
   file_data.append(header_line)
   
   for fund in sorted(fund_names):
     (investment, wealth, abs_return, ann_return) = perf_dict[fund]
     sharpe = risk_dict[fund]
 
-    line_data = fund + ',' + str(investment) + ',' + str(wealth) + ',' \
+    line_data = fund + ',' + str(investment) + ',1.0,' + str(wealth) + ',' \
       + str(abs_return) + ',' + str(ann_return) + ',' + str(sharpe)
     file_data.append(line_data)
     
