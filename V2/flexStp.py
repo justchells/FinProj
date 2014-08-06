@@ -29,12 +29,13 @@ def get_fund_wealth(units_dict, nav_dict):
 def compute_returns():
   
   global stats_dict, units_save_dict
+  stop_inv_dict = defaultdict(lambda: None)
   inv_dict = defaultdict(float)
   units_dict = defaultdict(float)
   cashflows_dict = defaultdict(list)
   
   default_inv = common.mnt_inv
-  max_inv = default_inv * (num_rows - 14)
+  max_total_inv = default_inv * (num_rows - 14)
 
   for i,r in enumerate(nav_data):
     
@@ -52,7 +53,7 @@ def compute_returns():
       fund_inv = inv_dict[fund]
       
       mnt_inv = max(default_inv, default_inv * index - fund_value)
-      mnt_inv = min(mnt_inv, max_inv - fund_inv)
+      mnt_inv = min(mnt_inv, max_total_inv - fund_inv)
       inv_dict[fund] += mnt_inv
       
       units = mnt_inv / nav
@@ -60,6 +61,9 @@ def compute_returns():
       units_save_dict[fund].append(units)
       cf = (dt, -mnt_inv)
       cashflows_dict[fund].append(cf)
+      
+      if fund_inv + mnt_inv == max_total_inv and not stop_inv_dict[fund]:
+        stop_inv_dict[fund] = index
     
   last_line = nav_data[num_rows - 1].split(',')
   curr_dt = datetime.strptime(last_line[0], '%d-%m-%Y')
@@ -69,6 +73,7 @@ def compute_returns():
   for fund in fund_names:
     
     investment = inv_dict[fund]
+    stop_inv = stop_inv_dict[fund]
     wealth = units_dict[fund] * curr_nav_dict[fund]
     abs_return = (wealth / investment) - 1
     
@@ -76,7 +81,7 @@ def compute_returns():
     cashflows_dict[fund].append(cf)
     ann_return = common.xirr(cashflows_dict[fund])
     
-    stats = [investment, wealth, abs_return, ann_return]
+    stats = [investment, wealth, abs_return, ann_return, stop_inv]
     stats_dict[fund].extend(stats)
   
 def compute_risk():
@@ -112,14 +117,17 @@ def compute_risk():
 def save():
 
   file_data = []
-  header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
+  header_line = 'Fund,Investment,InvPeriod,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
   file_data.append(header_line)
   
   for fund in sorted(fund_names):
   
-    (investment, wealth, abs_return, ann_return, sharpe) = stats_dict[fund]
-    line_data = fund + ',' + str(investment) + ',' + str(wealth) + ',' \
-      + str(abs_return) + ',' + str(ann_return) + ',' + str(sharpe)
+    (investment, wealth, abs_return, ann_return, stop_inv, sharpe) = stats_dict[fund]
+    total_period = num_rows - 14
+    inv_period = stop_inv * 1.0 / total_period
+    line_data = fund + ',' + str(investment) + ',' + str(inv_period) + ',' \
+      + str(wealth) + ',' + str(abs_return) + ',' + str(ann_return) + ',' \
+      + str(sharpe)
     file_data.append(line_data)
     
   out_file_path = os.path.join('output', 'flexStp.csv')

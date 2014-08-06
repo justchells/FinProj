@@ -5,7 +5,8 @@ import numpy
 from collections import defaultdict
 
 data_dir = 'data'
-nav_file = 'navData.csv'
+nav_file = 'diversified_2001.csv'
+# nav_file = 'largeCap_2001.csv'
 sharpe_data_file = 'sharpeData.csv'
 
 mnt_inv = 1000

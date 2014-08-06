@@ -94,6 +94,7 @@ def get_mnt_inv(index, nav, ma, prev_inv):
 def compute_returns():
 
   global stats_dict, units_save_dict
+  stop_inv_dict = defaultdict(lambda: None)
   inv_dict = defaultdict(float)
   last_inv_dict = defaultdict(lambda: common.mnt_inv)
   units_dict = defaultdict(float)
@@ -130,6 +131,9 @@ def compute_returns():
       
       cf = (dt, -mnt_inv)
       cashflows_dict[fund].append(cf)
+      
+      if fund_inv + mnt_inv == max_total_inv and not stop_inv_dict[fund]:
+        stop_inv_dict[fund] = (index + 1)
   
   last_line = nav_data[num_rows - 1].split(',')
   curr_dt = datetime.strptime(last_line[0], '%d-%m-%Y')
@@ -139,6 +143,7 @@ def compute_returns():
   for fund in fund_names:
 
     investment = inv_dict[fund]
+    stop_inv = stop_inv_dict[fund]
     wealth = units_dict[fund] * curr_nav_dict[fund]
     abs_return = (wealth / investment) - 1
     
@@ -146,7 +151,7 @@ def compute_returns():
     cashflows_dict[fund].append(cf)
     ann_return = common.xirr(cashflows_dict[fund])
     
-    stats = [investment, wealth, abs_return, ann_return]
+    stats = [investment, wealth, abs_return, ann_return, stop_inv]
     stats_dict[fund].extend(stats)
   
 def compute_risk():
@@ -182,14 +187,18 @@ def compute_risk():
 def save():
 
   file_data = []
-  header_line = 'Fund,Investment,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
+  header_line = 'Fund,Investment,InvPeriod,Wealth,AbsoluteReturn,AnnualizedReturn,Sharpe'
   file_data.append(header_line)
   
   for fund in sorted(fund_names):
   
-    (investment, wealth, abs_return, ann_return, sharpe) = stats_dict[fund]
-    line_data = fund + ',' + str(investment) + ',' + str(wealth) + ',' \
-      + str(abs_return) + ',' + str(ann_return) + ',' + str(sharpe)
+    (investment, wealth, abs_return, ann_return, stop_inv, sharpe) = stats_dict[fund]
+    total_period = num_rows - 14
+    stop_inv = total_period if not stop_inv else stop_inv
+    inv_period = stop_inv * 1.0 / total_period
+    line_data = fund + ',' + str(investment) + ',' + str(inv_period) + ',' \
+      + str(wealth) + ',' + str(abs_return) + ',' + str(ann_return) + ',' \
+      + str(sharpe)
     file_data.append(line_data)
   
   file_name = 'ma_%s_%s_month.csv' % (type, period)
@@ -203,92 +212,3 @@ def run(type, period):
   compute_returns()
   compute_risk()
   save()
-
-def stats_inc_factor():
-  
-  global inc_factor
-  max_factor = 2.0
-  stat_data = []
-  
-  for v in xrange(0, 101):
-    
-    val = v / 100.0
-    print 'inc_factor - %.2f' % val
-    inc_factor = val
-    set_global_vars('inverted', 12)
-    set_ma_data()
-    compute_returns()
-    compute_risk()
-    
-    ret_data = []
-    risk_data = []
-    for fund in fund_names:
-      (investment, wealth, abs_return, ann_return, sharpe) = stats_dict[fund]
-      ret_data.append(ann_return)
-      risk_data.append(sharpe)
-    
-    avg_ret = numpy.mean(ret_data)
-    avg_risk = numpy.mean(risk_data)
-    stat = '%s,%s,%s' % (inc_factor, avg_ret, avg_risk)
-    stat_data.append(stat)
-  
-  out_file_path = os.path.join('output', 'ma_stats_inc_factor.csv')
-  common.write_to_file(out_file_path, stat_data)
-  
-def optimize(target, factor):
-
-  common.header('Optimizing ' + target + ' using ' + factor)
-
-  global inc_factor, max_factor
-  inc_factor = 0.25
-  max_factor = 2.0
-  stat_data = []
-
-  if factor == 'inc_factor':
-    min_range = 0
-    max_range = 101
-    div_factor = 100.0
-  elif factor == 'max_factor':
-    min_range = 1
-    max_range = 11
-    div_factor = 2.0
-  
-  for p in (3, 6, 9, 12):
-  
-    print '%d months inverted MA' % p
-    max_val = 0.0
-    opt_val = 0.0
-    
-    for v in xrange(min_range, max_range):
-    
-      val = v / div_factor
-      if factor == 'inc_factor':
-        inc_factor = val
-      elif factor == 'max_factor':
-        max_factor = val
-      
-      set_global_vars('inverted', p)
-      set_ma_data()
-      compute_returns()
-      compute_risk()
-    
-      val_data = []
-      for fund in fund_names:
-        (investment, wealth, abs_return, ann_return, sharpe) = stats_dict[fund]
-        if target == 'returns':
-          val_data.append(ann_return)
-        elif target == 'risk':
-          val_data.append(sharpe)
-      curr_val = numpy.mean(val_data)
-        
-      if curr_val > max_val:
-        print 'improved value at %.2f - %.4f' % (val, curr_val)
-        opt_val = val
-        max_val = curr_val
-  
-    stat = '%d months MA, %.2f, %.4f' % (p, opt_val, max_val)
-    stat_data.append(stat)
-  
-  print '\nResults'
-  print '-' * 10
-  print '\n'.join(stat_data)  
